@@ -2,15 +2,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DiscoveryOptimizado {
+public class Discovery {
     public static List<String> generarSecuenciasTransformadas(String secuenciaEntrada) {
         int largoSecuencia = secuenciaEntrada.length();
-        int[] numeros = new int[(int) Math.pow(2, largoSecuencia)];
-        for (int i = 0; i < Math.pow(2, largoSecuencia); i++) {
-            numeros[i] = i;
-        }
+        int numCombinations = 1 << largoSecuencia; // Equivale a 2^largoSecuencia
         List<String> secuenciasTransformadas = new ArrayList<>();
-        for (int num : numeros) {
+        for (int num = 0; num < numCombinations; num++) {
             String representacionBinaria = String.format("%" + largoSecuencia + "s", Integer.toBinaryString(num))
                     .replace(' ', '0');
             StringBuilder nuevaSecuencia = new StringBuilder();
@@ -39,7 +36,7 @@ public class DiscoveryOptimizado {
             for (int i = 0; i < nuevaSecuenciaConNumeros.length(); i++) {
                 char caracter = nuevaSecuenciaConNumeros.charAt(i);
                 if (Character.isDigit(caracter)) {
-                    int valorContador = Integer.parseInt(String.valueOf(caracter));
+                    int valorContador = Character.getNumericValue(caracter);
                     if (valorContador > 0 && i > 0 && i < nuevaSecuenciaConNumeros.length() - 1 &&
                             !Character.isDigit(nuevaSecuenciaConNumeros.charAt(i - 1)) &&
                             !Character.isDigit(nuevaSecuenciaConNumeros.charAt(i + 1))) {
@@ -49,7 +46,7 @@ public class DiscoveryOptimizado {
                     nuevaSecuenciaFinal.append(caracter);
                 }
             }
-            // si no tiene mayúsculas, no se agrega
+            // Si no tiene mayúsculas, no se agrega
             if (nuevaSecuenciaFinal.toString().matches(".*[A-Z].*")) {
                 secuenciasTransformadas.add(nuevaSecuenciaFinal.toString());
             }
@@ -116,7 +113,7 @@ public class DiscoveryOptimizado {
                         nuevaSubsecuencia.append("-x(").append(contadorX).append(")");
                         contadorX = 0;
                     }
-                    if (j != 0) {
+                    if (nuevaSubsecuencia.length() > 0) {
                         nuevaSubsecuencia.append("-").append(char1);
                     } else {
                         nuevaSubsecuencia.append(char1);
@@ -185,28 +182,25 @@ public class DiscoveryOptimizado {
 
     public static List<String> ordenarListaConNumeros(List<String> listaStrings, List<Integer> listaNumeros,
             List<Integer> conteoMayusculas) {
-        List<String> listaOrdenada = new ArrayList<>();
-        List<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < listaStrings.size(); i++) {
-            indices.add(i);
-        }
-        Collections.sort(indices, (i1, i2) -> {
-            int cmpMayus = Integer.compare(conteoMayusculas.get(i2), conteoMayusculas.get(i1)); // Orden descendente
-            if (cmpMayus != 0) {
-                return cmpMayus;
-            } else {
-                return Integer.compare(listaNumeros.get(i2), listaNumeros.get(i1)); // Orden existente
+        List<String> listaOrdenada = new ArrayList<>(listaStrings);
+        Collections.sort(listaOrdenada, new Comparator<String>() {
+            public int compare(String s1, String s2) {
+                int idx1 = listaStrings.indexOf(s1);
+                int idx2 = listaStrings.indexOf(s2);
+                int cmpMayus = Integer.compare(conteoMayusculas.get(idx2), conteoMayusculas.get(idx1)); // Orden
+                                                                                                        // descendente
+                if (cmpMayus != 0) {
+                    return cmpMayus;
+                } else {
+                    return Integer.compare(listaNumeros.get(idx2), listaNumeros.get(idx1)); // Orden existente
+                }
             }
         });
-        for (int indice : indices) {
-            listaOrdenada.add(listaStrings.get(indice));
-        }
         return listaOrdenada;
     }
 
     private static List<String> leerSecuenciasDesdeConsola(Scanner scanner) {
         List<String> secuencias = new ArrayList<>();
-        System.out.println("Ingrese las secuencias (una por línea, termine con una línea vacía):");
         while (scanner.hasNextLine()) {
             String linea = scanner.nextLine();
             if (linea.isEmpty()) {
@@ -225,32 +219,29 @@ public class DiscoveryOptimizado {
             secuenciasLista1 = Arrays.asList(args[0].split(","));
             secuenciasLista2 = Arrays.asList(args[1].split(","));
         } else {
+            System.out.println(
+                    "Ingrese las secuencias para la primera lista (una por línea, termine con una línea vacía):");
             secuenciasLista1 = leerSecuenciasDesdeConsola(scanner);
+            System.out.println(
+                    "Ingrese las secuencias para la segunda lista (una por línea, termine con una línea vacía):");
             secuenciasLista2 = leerSecuenciasDesdeConsola(scanner);
         }
 
-        List<String> lista1 = new ArrayList<>();
-        List<String> lista2 = new ArrayList<>();
-        for (String secuencia : secuenciasLista1) {
-            lista1.addAll(generarSecuenciasTransformadas(secuencia));
-        }
-        for (String secuencia : secuenciasLista2) {
-            lista2.addAll(generarSecuenciasTransformadas(secuencia));
-        }
-        for (int i = 0; i < secuenciasLista1.size(); i++) {
+        int n = Math.min(secuenciasLista1.size(), secuenciasLista2.size());
+        for (int i = 0; i < n; i++) {
+            String secuencia1 = secuenciasLista1.get(i);
+            String secuencia2 = secuenciasLista2.get(i);
             long startTime = System.nanoTime();
-            List<String> lista1Sec = generarSecuenciasTransformadas(secuenciasLista1.get(i));
-            List<String> lista2Sec = generarSecuenciasTransformadas(secuenciasLista2.get(i));
+            List<String> lista1Sec = generarSecuenciasTransformadas(secuencia1);
+            List<String> lista2Sec = generarSecuenciasTransformadas(secuencia2);
             List<String> listaPatrones = compararTransformaciones(lista1Sec, lista2Sec);
-            int len = Math.max(secuenciasLista1.get(i).length(), secuenciasLista2.get(i).length());
+            int len = Math.max(secuencia1.length(), secuencia2.length());
             List<Integer> resultados = sumaStrings(listaPatrones, len);
             List<Integer> conteoMayusculas = contarMayusculas(listaPatrones);
             List<String> listaOrdenada = ordenarListaConNumeros(listaPatrones, resultados, conteoMayusculas);
             long endTime = System.nanoTime();
-            // Convertir a milisegundos
             long duration = (endTime - startTime) / 1000000;
-            System.out.println("Patrón final para el par (" + secuenciasLista1.get(i) + ", " + secuenciasLista2.get(i)
-                    + "): " + listaOrdenada);
+            System.out.println("Patrón final para el par (" + secuencia1 + ", " + secuencia2 + "): " + listaOrdenada);
             System.out.println("Duración: " + duration + " ms");
         }
         scanner.close();
