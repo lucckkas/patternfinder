@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DiscoveryOptimizado {
+public class DiscoveryOriginal {
     public static List<String> generarSecuenciasTransformadas(String secuenciaEntrada) {
         int largoSecuencia = secuenciaEntrada.length();
         int[] numeros = new int[(int) Math.pow(2, largoSecuencia)];

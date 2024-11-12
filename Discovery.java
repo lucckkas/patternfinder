@@ -1,33 +1,35 @@
+import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Discovery {
-    public static List<String> generarSecuenciasTransformadas(String secuenciaEntrada) {
+    public static List<String> generarSubsecuencias(String secuenciaEntrada) {
 
         int largoSecuencia = secuenciaEntrada.length();
 
-        int totalNumeros = (int) Math.pow(2, largoSecuencia);
+        BigInteger totalNumeros = BigInteger.ONE.shiftLeft(largoSecuencia);
 
-        int[] numeros = new int[totalNumeros];
-        for (int i = 0; i < totalNumeros; i++) {
-            numeros[i] = i;
-        }
-        List<String> secuenciasTransformadas = new ArrayList<>();
-        for (int num : numeros) {
-            String representacionBinaria = String.format("%" + largoSecuencia + "s", Integer.toBinaryString(num))
-                    .replace(' ', '0');
-
+        List<String> subsecuencias = new ArrayList<>();
+        // recorrer todas las subsecuencias posibles
+        for (BigInteger i = BigInteger.ZERO; i.compareTo(totalNumeros) < 0; i = i.add(BigInteger.ONE)) {
             StringBuilder nuevaSecuencia = new StringBuilder();
+
+            // recorrer la secuencia de entrada
             for (int idx = 0; idx < largoSecuencia; idx++) {
                 char caracter = secuenciaEntrada.charAt(idx);
-                nuevaSecuencia.append((representacionBinaria.charAt(idx) == '1') ? 'x' : caracter);
+                if (i.testBit(largoSecuencia - idx - 1)) {
+                    nuevaSecuencia.append('x');
+                } else {
+                    nuevaSecuencia.append(caracter);
+                }
             }
+            subsecuencias.add(nuevaSecuencia.toString());
 
             int contadorX = 0;
             StringBuilder nuevaSecuenciaConNumeros = new StringBuilder();
-            for (int i = 0; i < nuevaSecuencia.length(); i++) {
-                char caracter = nuevaSecuencia.charAt(i);
+            for (int j = 0; j < nuevaSecuencia.length(); j++) {
+                char caracter = nuevaSecuencia.charAt(j);
                 if (caracter == 'x') {
                     contadorX++;
                 } else {
@@ -41,15 +43,15 @@ public class Discovery {
             if (contadorX > 0) {
                 nuevaSecuenciaConNumeros.append(contadorX);
             }
-
+            // resto del codigo ...
             StringBuilder nuevaSecuenciaFinal = new StringBuilder();
-            for (int i = 0; i < nuevaSecuenciaConNumeros.length(); i++) {
-                char caracter = nuevaSecuenciaConNumeros.charAt(i);
+            for (int j = 0; j < nuevaSecuenciaConNumeros.length(); j++) {
+                char caracter = nuevaSecuenciaConNumeros.charAt(j);
                 if (Character.isDigit(caracter)) {
                     int valorContador = Integer.parseInt(String.valueOf(caracter));
-                    if (valorContador > 0 && i > 0 && i < nuevaSecuenciaConNumeros.length() - 1 &&
-                            !Character.isDigit(nuevaSecuenciaConNumeros.charAt(i - 1)) &&
-                            !Character.isDigit(nuevaSecuenciaConNumeros.charAt(i + 1))) {
+                    if (valorContador > 0 && j > 0 && j < nuevaSecuenciaConNumeros.length() - 1 &&
+                            !Character.isDigit(nuevaSecuenciaConNumeros.charAt(j - 1)) &&
+                            !Character.isDigit(nuevaSecuenciaConNumeros.charAt(j + 1))) {
                         nuevaSecuenciaFinal.append(caracter);
                     }
                 } else {
@@ -60,13 +62,13 @@ public class Discovery {
             // si no tiene mayúsculas, no se agrega
             if (nuevaSecuenciaFinal.toString().matches(".*[A-Z].*")) {
 
-                secuenciasTransformadas.add(nuevaSecuenciaFinal.toString());
+                subsecuencias.add(nuevaSecuenciaFinal.toString());
             } else {
 
             }
         }
 
-        return secuenciasTransformadas;
+        return subsecuencias;
     }
 
     public static List<String> compararTransformaciones(List<String> lista1, List<String> lista2) {
@@ -230,53 +232,50 @@ public class Discovery {
         return listaOrdenada;
     }
 
-    private static List<String> leerSecuenciasDesdeConsola(Scanner scanner) {
-        List<String> secuencias = new ArrayList<>();
+    private static String leerSecuenciasDesdeConsola(Scanner scanner) {
+        String secuencia = new String();
         while (scanner.hasNextLine()) {
             String linea = scanner.nextLine();
-            if (linea.isEmpty()) {
+            if (!linea.isEmpty()) {
+                System.out.println("Secuencia ingresada: " + linea);
+                secuencia = linea;
                 break;
+            } else {
+                System.out.println("Ingrese una secuencia válida");
             }
-            System.out.println("Secuencia ingresada: " + linea);
-            secuencias.add(linea);
-            break;
         }
-        return secuencias;
+        return secuencia;
     }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        List<String> secuenciasLista1;
-        List<String> secuenciasLista2;
+        String secuencia1;
+        String secuencia2;
         if (args.length >= 2) {
-            secuenciasLista1 = Arrays.asList(args[0].split(","));
-            secuenciasLista2 = Arrays.asList(args[1].split(","));
+            secuencia1 = args[0];
+            secuencia2 = args[1];
         } else {
             System.out.println("Ingrese secuencia 1:");
-            secuenciasLista1 = leerSecuenciasDesdeConsola(scanner);
+            secuencia1 = leerSecuenciasDesdeConsola(scanner);
             System.out.println("Ingrese secuencia 2:");
-            secuenciasLista2 = leerSecuenciasDesdeConsola(scanner);
+            secuencia2 = leerSecuenciasDesdeConsola(scanner);
         }
-
-        for (int i = 0; i < secuenciasLista1.size(); i++) {
-
-            System.out.println("Secuencia 1: " + secuenciasLista1.get(i));
-            System.out.println("Secuencia 2: " + secuenciasLista2.get(i));
-            long startTime = System.nanoTime();
-            List<String> lista1Sec = generarSecuenciasTransformadas(secuenciasLista1.get(i));
-            List<String> lista2Sec = generarSecuenciasTransformadas(secuenciasLista2.get(i));
-            List<String> listaPatrones = compararTransformaciones(lista1Sec, lista2Sec);
-            System.out.println("Patrones encontrados: " + listaPatrones);
-            int len = Math.max(secuenciasLista1.get(i).length(), secuenciasLista2.get(i).length());
-            List<Integer> resultados = sumaStrings(listaPatrones, len);
-            List<String> listaOrdenada = ordenarListaConNumeros(listaPatrones, resultados);
-            long endTime = System.nanoTime();
-            // Convertir a milisegundos
-            long duration = (endTime - startTime) / 1000000;
-            System.out.println("Patrón final para el par (" + secuenciasLista1.get(i) + ", " + secuenciasLista2.get(i)
-                    + "): " + listaOrdenada);
-            System.out.println("Duración: " + duration + " ms");
-        }
+        System.out.println("Secuencia 1: " + secuencia1);
+        System.out.println("Secuencia 2: " + secuencia2);
+        long startTime = System.nanoTime();
+        List<String> lista1Sec = generarSubsecuencias(secuencia1);
+        List<String> lista2Sec = generarSubsecuencias(secuencia2);
+        List<String> listaPatrones = compararTransformaciones(lista1Sec, lista2Sec);
+        System.out.println("Patrones encontrados: " + listaPatrones);
+        int len = Math.max(secuencia1.length(), secuencia2.length());
+        List<Integer> resultados = sumaStrings(listaPatrones, len);
+        List<String> listaOrdenada = ordenarListaConNumeros(listaPatrones, resultados);
+        long endTime = System.nanoTime();
+        // Convertir a milisegundos
+        long duration = (endTime - startTime) / 1000000;
+        System.out.println("Patrón final para el par (" + secuencia1 + ", " + secuencia2
+                + "): " + listaOrdenada);
+        System.out.println("Duración: " + duration + " ms");
         scanner.close();
     }
 }
