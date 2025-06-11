@@ -2,10 +2,18 @@ package discovery
 
 import (
 	"strconv"
+	"strings"
 	"unicode"
 )
 
-// ScorePatterns asigna puntuaciones a cada patrón según tu fórmula.
+// ScorePatterns asigna a cada patrón su puntuación según:
+//
+//	Score = X + m*n + y*n^2
+//	donde:
+//	  X  = suma de los gaps (para x(i,j) toma el mayor: max(i,j))
+//	  m  = nº de letras minúsculas
+//	  y  = nº de letras mayúsculas
+//	  n  = longitud original (maxLen)
 func ScorePatterns(patterns []string, maxLen int) map[string]int {
 	scores := make(map[string]int, len(patterns))
 	for _, p := range patterns {
@@ -14,41 +22,45 @@ func ScorePatterns(patterns []string, maxLen int) map[string]int {
 	return scores
 }
 
-// scoreSingle parsea p buscando x(n) y letras, y aplica tu fórmula.
 func scoreSingle(p string, maxLen int) int {
-	score := 0
-	numBuf := ""
+	parts := strings.Split(p, "-")
+	sumX := 0
+	lowerCount := 0
+	upperCount := 0
 
-	flushNum := func() {
-		if numBuf != "" {
-			if n, err := strconv.Atoi(numBuf); err == nil {
-				// sumar el mayor entre n y maxLen (o tu regla)
-				if n > maxLen {
-					score += n
+	for _, tok := range parts {
+		// Gaps: "x(n)" o "x(i,j)"
+		if strings.HasPrefix(tok, "x(") && strings.HasSuffix(tok, ")") {
+			inner := tok[2 : len(tok)-1] // entre paréntesis
+			if comma := strings.Index(inner, ","); comma >= 0 {
+				// rango: tomamos el mayor
+				n1, _ := strconv.Atoi(inner[:comma])
+				n2, _ := strconv.Atoi(inner[comma+1:])
+				if n1 > n2 {
+					sumX += n1
 				} else {
-					score += maxLen
+					sumX += n2
 				}
+			} else {
+				// único valor
+				n, _ := strconv.Atoi(inner)
+				sumX += n
 			}
-			numBuf = ""
+			continue
+		}
+
+		// Letras
+		if len(tok) == 1 {
+			r := rune(tok[0])
+			switch {
+			case unicode.IsUpper(r):
+				upperCount++
+			case unicode.IsLower(r):
+				lowerCount++
+			}
 		}
 	}
 
-	for _, r := range p {
-		switch {
-		case unicode.IsDigit(r):
-			numBuf += string(r)
-		case r == 'x' || r == '(' || r == ')' || r == ',':
-			// delimitadores de rango o placeholder
-		case unicode.IsUpper(r):
-			flushNum()
-			score += maxLen * maxLen
-		case unicode.IsLower(r):
-			flushNum()
-			score += maxLen
-		default:
-			flushNum()
-		}
-	}
-	flushNum()
-	return score
+	// aplicamos la fórmula
+	return sumX + lowerCount*maxLen + upperCount*(maxLen*maxLen)
 }

@@ -47,7 +47,7 @@ func main() {
 	// 5) Imprimir resultados
 	fmt.Println("Patterns found and scored:")
 	for _, p := range pats {
-		fmt.Printf("%s (%d)\n", p, scores[p])
+		fmt.Printf("%s \t(%d)\n", p, scores[p])
 	}
 
 	// Calculamos y mostramos el tiempo transcurrido
