@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/lucckkas/Memoria/pkg/discovery"
 )
@@ -23,6 +24,9 @@ func main() {
 		os.Exit(1)
 	}
 	seq1, seq2 := flag.Arg(0), flag.Arg(1)
+
+	// Iniciamos el cronómetro justo antes de la fase principal
+	start := time.Now()
 
 	// 1) Generar subsecuencias
 	sub1 := discovery.GenerateSubsequences(seq1)
@@ -45,4 +49,8 @@ func main() {
 	for _, p := range pats {
 		fmt.Printf("%s (%d)\n", p, scores[p])
 	}
+
+	// Calculamos y mostramos el tiempo transcurrido
+	elapsed := time.Since(start)
+	fmt.Printf("Duration: %s\n", elapsed)
 }
