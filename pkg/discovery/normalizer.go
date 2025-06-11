@@ -51,6 +51,7 @@ func normalizeTokens(raw []token) []token {
 	return norm
 }
 
+// stripDigits elimina todos los dígitos de una cadena,
 func stripDigits(s string) string {
 	var sb strings.Builder
 	for _, r := range s {

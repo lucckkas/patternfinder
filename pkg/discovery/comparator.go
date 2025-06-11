@@ -4,21 +4,21 @@ package discovery
 // soportando rangos multi-dígito y varias letras.
 func CompareSubsequences(a, b []string) []string {
 	setB := make(map[string]struct{}, len(b))
-	for _, s := range b {
-		setB[s] = struct{}{}
+	for _, subsequenceB := range b {
+		setB[subsequenceB] = struct{}{}
 	}
 
 	result := make(map[string]struct{})
-	for _, s1 := range a {
-		if _, ok := setB[s1]; ok {
-			if pat := formatIdentical(s1); pat != "" {
+	for _, subsequenceA := range a {
+		if _, ok := setB[subsequenceA]; ok { // si s1 está en b
+			if pat := formatIdentical(subsequenceA); pat != "" {
 				result[pat] = struct{}{}
 			}
 		} else {
-			for _, s2 := range b {
-				if stripDigits(s1) == stripDigits(s2) {
-					if pat := formatVariant(s1, s2); pat != "" {
-						result[pat] = struct{}{}
+			for _, s2 := range b { // buscamos variantes
+				if stripDigits(subsequenceA) == stripDigits(s2) {
+					if patron := formatVariant(subsequenceA, s2); patron != "" {
+						result[patron] = struct{}{}
 					}
 				}
 			}

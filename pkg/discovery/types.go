@@ -6,18 +6,3 @@ type token struct {
 	num    int
 	letter rune
 }
-
-// helpers genéricos
-func isDigit(r rune) bool { return r >= '0' && r <= '9' }
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
