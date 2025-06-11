@@ -44,9 +44,7 @@ func main() {
 		return scores[pats[i]] > scores[pats[j]]
 	})
 
-	// Calculamos y mostramos el tiempo transcurrido
 	elapsed := time.Since(start)
-	fmt.Printf("Duration: %s\n", elapsed)
 
 	// 5) Imprimir resultados
 	fmt.Println("Patterns found and scored:")
@@ -54,4 +52,5 @@ func main() {
 		fmt.Printf("%s \t(%d)\n", p, scores[p])
 	}
 
+	fmt.Printf("Duration: %s\n", elapsed)
 }
