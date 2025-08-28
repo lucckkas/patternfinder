@@ -23,6 +23,5 @@ func main() {
 
 	fmt.Println("Patrón (mayúsculas):", agg.Pattern)
 	fmt.Println("Gaps (min,max):      ", agg.GapRanges)
-	fmt.Println("Suma min gaps:       ", agg.ScoreGapsSum)
 	fmt.Println("Formateado:          ", pattern.FormatPattern(agg))
 }
