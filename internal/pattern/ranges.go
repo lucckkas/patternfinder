@@ -66,7 +66,6 @@ func indicesOf(s string, ch byte, lo, hi int) []int {
 // en UNA secuencia, considerando todas las incrustaciones viables (a<b).
 func minGapForPair(pattern string, proj UpperProjection, i int, earliest, latest []int) (int, bool) {
 	s := proj.Original
-	pref := proj.PrefLower
 
 	loA, hiA := earliest[i], latest[i]
 	loB, hiB := earliest[i+1], latest[i+1]
@@ -87,7 +86,7 @@ func minGapForPair(pattern string, proj UpperProjection, i int, earliest, latest
 			break
 		}
 		b := occB[j]
-		val := pref[b] - pref[a+1]
+		val := b - a - 1
 		if val < minGap {
 			minGap = val
 		}

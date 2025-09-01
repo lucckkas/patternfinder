@@ -1,27 +1,41 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
 
 	"github.com/lucckkas/patternfinder/internal/pattern"
 )
 
 func main() {
-	seqs := os.Args[1:]
-	if len(seqs) == 0 {
-		fmt.Println("No se proporcionaron secuencias.")
-		fmt.Println("Uso: patternfinder SEQ1 SEQ2 SEQ3 ...")
+	topK := flag.Int("top", 1, "cuántos patrones devolver (top-K)")
+	flag.Parse()
+	seqs := flag.Args()
+	if len(seqs) < 2 {
+		fmt.Println("Se requieren al menos 2 secuencias.")
 		return
 	}
 
-	agg, ok := pattern.BestCommonPattern(seqs)
+	if *topK <= 1 {
+		agg, ok := pattern.BestCommonPattern(seqs)
+		if !ok {
+			fmt.Println("No hay patrón común.")
+			return
+		}
+		fmt.Println("Patrón (mayúsculas):", agg.Pattern)
+		fmt.Println("Gaps (min,max):      ", agg.GapRanges)
+		fmt.Println("Formateado:          ", pattern.FormatPattern(agg))
+		return
+	}
+
+	opts := pattern.DefaultTopKOptions()
+	aggs, ok := pattern.TopKCommonPatterns(seqs, *topK, opts)
 	if !ok {
-		fmt.Println("No hay patrón común.")
+		fmt.Println("No hay patrones.")
 		return
 	}
-
-	fmt.Println("Patrón (mayúsculas):", agg.Pattern)
-	fmt.Println("Gaps (min,max):      ", agg.GapRanges)
-	fmt.Println("Formateado:          ", pattern.FormatPattern(agg))
+	for i, agg := range aggs {
+		fmt.Printf("[%d] %s |\t %s\n",
+			i+1, agg.Pattern, pattern.FormatPattern(agg))
+	}
 }
