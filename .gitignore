@@ -1,0 +1,53 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+# IDEs
+.idea/
+.vscode/
+
+# Go
+bin/
+build/
+dist/
+*.exe
+*.exe~
+*.test
+*.out
+*.dll
+*.so
+*.dylib
+*.a
+*.o
+coverage.out
+profile.out
+
+# Go modules
+vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.egg*
+.eggs/
+build/
+develop-eggs/
+dist/
+.env
+.venv
+env/
+venv/
+
+# Testing
+.coverage
+.pytest_cache/
+.mypy_cache/
+
+# Tools
+pip-wheel-metadata/
+scratch/
