@@ -7,17 +7,6 @@ import (
 
 // ---------------- utilidades de posiciones ----------------
 
-func positionsByUpper(s string) map[byte][]int {
-	pos := make(map[byte][]int, 26)
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c >= 'A' && c <= 'Z' {
-			pos[c] = append(pos[c], i)
-		}
-	}
-	return pos
-}
-
 func indicesOfInRange(s string, ch byte, lo, hi int) []int {
 	if lo < 0 {
 		lo = 0

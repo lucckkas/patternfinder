@@ -24,6 +24,7 @@ dist/
 *.o
 coverage.out
 profile.out
+.gocache/
 
 # Go modules
 vendor/

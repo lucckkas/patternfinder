@@ -26,45 +26,77 @@ func DPTable(sec1, sec2 string) [][]int {
 }
 
 // AllLCS hace el backtracking para encontrar todas las LCS posibles
-func AllLCS(sec1, sec2 string, dp [][]int) []string {
+func AllLCS(sec1, sec2 string, matriz [][]int) []string {
 	type key struct{ i, j int }
-	memo := make(map[key]map[string]struct{}) // para simplificar calculos repetidos
+	memo := make(map[key]map[string]struct{}) // evita recalcular estados
 
-	var dfs func(i, j int) map[string]struct{}
-	dfs = func(i, j int) map[string]struct{} {
-		if dp[i][j] == 0 {
-			return map[string]struct{}{"": {}}
-		}
-		k := key{i, j}
-		if got, ok := memo[k]; ok {
-			return got
-		}
-		res := make(map[string]struct{})
-
-		// coincidencia: ir diagonal
-		if i > 0 && j > 0 && sec1[i-1] == sec2[j-1] && dp[i][j] == dp[i-1][j-1]+1 {
-			for s := range dfs(i-1, j-1) {
-				res[s+string(sec1[i-1])] = struct{}{}
-			}
-			memo[k] = res
-			return res
-		}
-		// no coincidencia: ir arriba o izquierda según convenga
-		if i > 0 && dp[i-1][j] == dp[i][j] {
-			for s := range dfs(i-1, j) {
-				res[s] = struct{}{}
-			}
-		}
-		if j > 0 && dp[i][j-1] == dp[i][j] {
-			for s := range dfs(i, j-1) {
-				res[s] = struct{}{}
-			}
-		}
-		memo[k] = res
-		return res
+	type frame struct {
+		i, j int
+		done bool
 	}
 
-	set := dfs(len(sec1), len(sec2))
+	stack := []frame{{i: len(sec1), j: len(sec2)}}
+
+	for len(stack) > 0 {
+		fmt.Println("Stack size:", len(stack))
+		current := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		k := key{current.i, current.j}
+		fmt.Println("Processing:", k)
+
+		if _, ok := memo[k]; ok {
+			fmt.Println("  Already computed, skipping")
+			continue
+		}
+
+		if matriz[current.i][current.j] == 0 {
+			memo[k] = map[string]struct{}{"": {}}
+			continue
+		}
+
+		if !current.done {
+			// reinsertar el estado indicando que ya se ha procesado
+			stack = append(stack, frame{i: current.i, j: current.j, done: true})
+
+			// si hay coincidencia, ir diagonal
+			if sec1[current.i-1] == sec2[current.j-1] {
+				stack = append(stack, frame{i: current.i - 1, j: current.j - 1})
+				continue
+			}
+
+			// si no hay coincidencia, ir a los estados que mantienen la longitud
+			if matriz[current.i-1][current.j] == matriz[current.i][current.j] {
+				stack = append(stack, frame{i: current.i - 1, j: current.j})
+			}
+			if matriz[current.i][current.j-1] == matriz[current.i][current.j] {
+				stack = append(stack, frame{i: current.i, j: current.j - 1})
+			}
+			continue
+		}
+
+		res := make(map[string]struct{})
+
+		if sec1[current.i-1] == sec2[current.j-1] {
+			for s := range memo[key{current.i - 1, current.j - 1}] {
+				res[s+string(sec1[current.i-1])] = struct{}{}
+			}
+		} else {
+			if matriz[current.i-1][current.j] == matriz[current.i][current.j] {
+				for s := range memo[key{current.i - 1, current.j}] {
+					res[s] = struct{}{}
+				}
+			}
+			if matriz[current.i][current.j-1] == matriz[current.i][current.j] {
+				for s := range memo[key{current.i, current.j - 1}] {
+					res[s] = struct{}{}
+				}
+			}
+		}
+
+		memo[k] = res
+	}
+
+	set := memo[key{len(sec1), len(sec2)}]
 	out := make([]string, 0, len(set))
 	for s := range set {
 		out = append(out, s)
