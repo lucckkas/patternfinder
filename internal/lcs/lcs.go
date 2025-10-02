@@ -77,8 +77,8 @@ func DPTableParallel(sec1, sec2 string) [][]int {
 	return dp
 }
 
-// AllLCS hace el backtracking para encontrar todas las LCS posibles
-func AllLCS(sec1, sec2 string, matriz [][]int) []string {
+// Backtracking hace el backtracking para encontrar todas las LCS posibles
+func Backtracking(sec1, sec2 string, matriz [][]int) []string {
 	type key struct{ i, j int }
 	memo := make(map[key]map[string]struct{}) // evita recalcular estados
 
@@ -151,8 +151,8 @@ func AllLCS(sec1, sec2 string, matriz [][]int) []string {
 	return out
 }
 
-// AllLCSParallel explora el backtracking de forma concurrente cuando existen ramas independientes.
-func AllLCSParallel(sec1, sec2 string, matriz [][]int) []string {
+// BacktrackingParallel explora el backtracking de forma concurrente cuando existen ramas independientes.
+func BacktrackingParallel(sec1, sec2 string, matriz [][]int) []string {
 	type key struct{ i, j int }
 
 	type entry struct {

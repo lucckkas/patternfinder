@@ -40,10 +40,10 @@ func main() {
 	)
 	if *seq {
 		dp = lcs.DPTable(Ux, Uy)
-		all = lcs.AllLCS(Ux, Uy, dp)
+		all = lcs.Backtracking(Ux, Uy, dp)
 	} else {
 		dp = lcs.DPTableParallel(Ux, Uy)
-		all = lcs.AllLCSParallel(Ux, Uy, dp)
+		all = lcs.BacktrackingParallel(Ux, Uy, dp)
 	}
 	if *showDP {
 		fmt.Println("Matriz LCS (longitudes):")
