@@ -14,6 +14,7 @@ import (
 
 func main() {
 	showDP := flag.Bool("dp", false, "imprimir matriz LCS (longitudes)")
+	seq := flag.Bool("seq", false, "usar versión secuencial del LCS")
 	flag.Parse()
 
 	args := flag.Args()
@@ -33,13 +34,22 @@ func main() {
 		return
 	}
 
-	dp := lcs.DPTable(Ux, Uy)
+	var (
+		dp  [][]int
+		all []string
+	)
+	if *seq {
+		dp = lcs.DPTable(Ux, Uy)
+		all = lcs.AllLCS(Ux, Uy, dp)
+	} else {
+		dp = lcs.DPTableParallel(Ux, Uy)
+		all = lcs.AllLCSParallel(Ux, Uy, dp)
+	}
 	if *showDP {
 		fmt.Println("Matriz LCS (longitudes):")
 		lcs.PrintDP(Ux, Uy, dp)
 	}
 
-	all := lcs.AllLCS(Ux, Uy, dp)
 	if len(all) == 0 {
 		fmt.Println("No se encontraron LCS.")
 		return

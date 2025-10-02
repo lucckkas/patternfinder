@@ -1,6 +1,9 @@
 package lcs
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 // DPTable construye la tabla para las longitudes de LCS
 func DPTable(sec1, sec2 string) [][]int {
@@ -25,6 +28,55 @@ func DPTable(sec1, sec2 string) [][]int {
 	return dp
 }
 
+// DPTableParallel construye la tabla LCS evaluando cada diagonal en paralelo.
+func DPTableParallel(sec1, sec2 string) [][]int {
+	n, m := len(sec1), len(sec2)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, m+1)
+	}
+
+	for diag := 2; diag <= n+m; diag++ {
+		start := 1
+		if diag-m > start {
+			start = diag - m
+		}
+		if start < 1 {
+			start = 1
+		}
+
+		end := diag - 1
+		if end > n {
+			end = n
+		}
+
+		var wg sync.WaitGroup
+		for i := start; i <= end; i++ {
+			j := diag - i
+			if j < 1 || j > m {
+				continue
+			}
+
+			wg.Add(1)
+			go func(i, j int) {
+				defer wg.Done()
+				if sec1[i-1] == sec2[j-1] {
+					dp[i][j] = dp[i-1][j-1] + 1
+					return
+				}
+				if dp[i-1][j] >= dp[i][j-1] {
+					dp[i][j] = dp[i-1][j]
+					return
+				}
+				dp[i][j] = dp[i][j-1]
+			}(i, j)
+		}
+		wg.Wait()
+	}
+
+	return dp
+}
+
 // AllLCS hace el backtracking para encontrar todas las LCS posibles
 func AllLCS(sec1, sec2 string, matriz [][]int) []string {
 	type key struct{ i, j int }
@@ -38,14 +90,11 @@ func AllLCS(sec1, sec2 string, matriz [][]int) []string {
 	stack := []frame{{i: len(sec1), j: len(sec2)}}
 
 	for len(stack) > 0 {
-		fmt.Println("Stack size:", len(stack))
 		current := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 		k := key{current.i, current.j}
-		fmt.Println("Processing:", k)
 
 		if _, ok := memo[k]; ok {
-			fmt.Println("  Already computed, skipping")
 			continue
 		}
 
@@ -55,16 +104,14 @@ func AllLCS(sec1, sec2 string, matriz [][]int) []string {
 		}
 
 		if !current.done {
-			// reinsertar el estado indicando que ya se ha procesado
+			// reinsertar el estado indicando que los hijos ya fueron explorados
 			stack = append(stack, frame{i: current.i, j: current.j, done: true})
 
-			// si hay coincidencia, ir diagonal
 			if sec1[current.i-1] == sec2[current.j-1] {
 				stack = append(stack, frame{i: current.i - 1, j: current.j - 1})
 				continue
 			}
 
-			// si no hay coincidencia, ir a los estados que mantienen la longitud
 			if matriz[current.i-1][current.j] == matriz[current.i][current.j] {
 				stack = append(stack, frame{i: current.i - 1, j: current.j})
 			}
@@ -97,6 +144,102 @@ func AllLCS(sec1, sec2 string, matriz [][]int) []string {
 	}
 
 	set := memo[key{len(sec1), len(sec2)}]
+	out := make([]string, 0, len(set))
+	for s := range set {
+		out = append(out, s)
+	}
+	return out
+}
+
+// AllLCSParallel explora el backtracking de forma concurrente cuando existen ramas independientes.
+func AllLCSParallel(sec1, sec2 string, matriz [][]int) []string {
+	type key struct{ i, j int }
+
+	type entry struct {
+		once sync.Once
+		res  map[string]struct{}
+	}
+
+	var (
+		memo   = make(map[key]*entry)
+		memoMu sync.Mutex
+	)
+
+	getEntry := func(i, j int) *entry {
+		k := key{i: i, j: j}
+		memoMu.Lock()
+		e, ok := memo[k]
+		if !ok {
+			e = &entry{}
+			memo[k] = e
+		}
+		memoMu.Unlock()
+		return e
+	}
+
+	var compute func(i, j int) map[string]struct{}
+	compute = func(i, j int) map[string]struct{} {
+		e := getEntry(i, j)
+		e.once.Do(func() {
+			if matriz[i][j] == 0 {
+				e.res = map[string]struct{}{"": {}}
+				return
+			}
+
+			if i > 0 && j > 0 && sec1[i-1] == sec2[j-1] {
+				prev := compute(i-1, j-1)
+				res := make(map[string]struct{}, len(prev))
+				for s := range prev {
+					res[s+string(sec1[i-1])] = struct{}{}
+				}
+				e.res = res
+				return
+			}
+
+			branches := make([]struct{ i, j int }, 0, 2)
+			if i > 0 && matriz[i-1][j] == matriz[i][j] {
+				branches = append(branches, struct{ i, j int }{i - 1, j})
+			}
+			if j > 0 && matriz[i][j-1] == matriz[i][j] {
+				branches = append(branches, struct{ i, j int }{i, j - 1})
+			}
+
+			res := make(map[string]struct{})
+			switch len(branches) {
+			case 0:
+				// sin ramas viables, mantenemos conjunto vacío
+			case 1:
+				sub := compute(branches[0].i, branches[0].j)
+				for s := range sub {
+					res[s] = struct{}{}
+				}
+			default:
+				var (
+					wg sync.WaitGroup
+					mu sync.Mutex
+				)
+				for _, br := range branches {
+					br := br
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						sub := compute(br.i, br.j)
+						mu.Lock()
+						for s := range sub {
+							res[s] = struct{}{}
+						}
+						mu.Unlock()
+					}()
+				}
+				wg.Wait()
+			}
+
+			e.res = res
+		})
+		return e.res
+	}
+
+	set := compute(len(sec1), len(sec2))
 	out := make([]string, 0, len(set))
 	for s := range set {
 		out = append(out, s)
