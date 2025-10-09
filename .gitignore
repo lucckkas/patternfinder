@@ -13,6 +13,7 @@ Thumbs.db
 bin/
 build/
 dist/
+final/
 *.exe
 *.exe~
 *.test

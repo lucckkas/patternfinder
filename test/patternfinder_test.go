@@ -43,6 +43,14 @@ var testCases = []patternCase{
 		},
 	},
 	{
+		name: "SimplePatterns",
+		seq1: "AB",
+		seq2: "AB",
+		expected: []patternResult{
+			{pattern: "AB", formatted: "A-B"},
+		},
+	},
+	{
 		name: "ComplexPatterns",
 		seq1: "DxxBxxxxDxxCxxxAxxBxxxA",
 		seq2: "BxxAxxxBxxCxxxxBxxDxxxAxxBxxxxB",

@@ -55,5 +55,38 @@
         "CA_A_152": [
             "NiDgDgQvnyeE"
         ]
+    },
+    "1cll": {
+        "CA_A_149": [
+            "DkDgDgTittkE"
+        ],
+        "CA_A_150": [
+            "DaDgNgTidfpE"
+        ],
+        "CA_A_151": [
+            "DkDgNgYisaaE"
+        ],
+        "CA_A_152": [
+            "DiDgDgQvnyeE"
+        ],
+        "EOH_A_153": [
+            "M"
+        ]
+    },
+    "1WG2": {
+        "ZN_A_200": [
+            "CfSCnKkvgvmgfkckcgstfCgSH"
+        ],
+        "ZN_A_400": [
+            "CkCgstFcgshryPekHeC"
+        ]
+    },
+    "1WFP": {
+        "ZN_A_201": [
+            "ClSCnkkvgvtgfkcrcgstfCgTH"
+        ],
+        "ZN_A_401": [
+            "CrCgstFcgthrypesHeC"
+        ]
     }
 }

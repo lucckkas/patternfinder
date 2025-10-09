@@ -62,8 +62,7 @@ func FormatPatternWithValues(pattern string, sets []GapValues) string {
 			sort.Ints(vals)
 			switch len(vals) {
 			case 0:
-				// No debería ocurrir; lo tratamos como x(?)
-				out = append(out, []byte("-x(?) -")...)
+				out = append(out, []byte("-")...)
 			case 1:
 				out = append(out, []byte(fmt.Sprintf("-x(%d)-", vals[0]))...)
 			default:
@@ -106,6 +105,10 @@ func PairUnionSets(setsX, setsY []map[int]struct{}) []GapValues {
 			vals = append(vals, v)
 		}
 		sort.Ints(vals)
+		// si solo hay 0 no tiene sentido guardarlo
+		if len(vals) == 1 && vals[0] == 0 {
+			vals = nil
+		}
 		out[i] = GapValues{Values: vals}
 	}
 	return out
