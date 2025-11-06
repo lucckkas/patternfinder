@@ -8,13 +8,14 @@
 \LoadClass{report}
 
 \RequirePackage[utf8]{inputenc}
-\RequirePackage[english,spanish]{babel}
+\RequirePackage[english,spanish,provide=*]{babel}
 \RequirePackage{graphicx}
 \RequirePackage{setspace}
 \RequirePackage{float}
 \RequirePackage{algorithm}
 \RequirePackage{algpseudocode}
 \RequirePackage{amsmath}
+\RequirePackage{amssymb}
 
 \selectlanguage{spanish}
 \bibliographystyle{plain}
@@ -97,7 +98,7 @@
 \def\logo
 {
 \begin{center}
-\resizebox{2.3cm}{2.8cm}{\includegraphics{utalca1.eps}}
+\resizebox{2.3cm}{2.8cm}{\includegraphics{images/utalca1.eps}}
 \end{center}
 }
 
@@ -535,4 +536,3 @@ Memoria para optar al título de Ingeniero Civil en Computación\\}%} \\}
     #1\par}\@endappendix}
 
 \endinput
-

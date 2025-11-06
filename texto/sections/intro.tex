@@ -1,0 +1,318 @@
+%% crea la tapa
+\maketitle
+
+%% dedicatoria
+\begin{dedicatory}
+Dedicado a ...
+\end{dedicatory}
+
+%% agradecimientos
+\begin{acknowledgment}
+Agradecimientos a ...
+\end{acknowledgment}
+
+%% indices
+\tableofcontents
+\listoffigures
+\listoftables
+
+%% resumen
+\begin{resumen}
+La identificación de patrones en proteínas es un desafío clave en bioinformática, esencial para comprender cómo interactúan los aminoácidos con otras moléculas como los ligandos. Las aproximaciones tradicionales que generan todas las subsecuencias posibles sufren un crecimiento combinatorio que limita su uso práctico debido al elevado coste computacional.
+
+Para abordar esta problemática se desarrolló un algoritmo paralelo basado en la estrategia de la \textit{Longest Common Subsequence} (LCS). La solución reemplaza la enumeración exhaustiva de subsecuencias por una formulación de programación dinámica que calcula las coincidencias sobre una matriz $n \times m$ y permite recuperar alineamientos compatibles con la notación Prosite. La implementación, construida en Golang y apoyada en Biopython para el preprocesamiento, distribuye el cálculo y la reconstrucción de la LCS entre múltiples hilos para reducir los tiempos de búsqueda frente al enfoque secuencial.
+
+Si bien el algoritmo LCS-paralelo mitiga la explosión combinatoria del método previo, su eficiencia sigue dependiendo de la longitud de las secuencias, del número de alineamientos necesarios y de las características del hardware disponible. Futuras optimizaciones pueden considerar técnicas avanzadas de poda y heurísticas de alineamiento para escalar a volúmenes aún mayores sin perder precisión biológica.
+
+La proyección de este trabajo es promisoria en contextos como el diseño de fármacos y la ingeniería de proteínas, donde se requiere identificar patrones proteína-ligando de manera rápida y confiable. También se contempla la integración con otras herramientas bioinformáticas para habilitar análisis complejos en tiempo real y extender la aplicabilidad del algoritmo a estudios de mayor envergadura.
+\end{resumen}
+
+%% abstract
+
+%% contenido del primer capítulo
+\chapter{Introducción}
+
+La tarea de descubrir patrones en proteínas es fundamental en bioinformática y biología computacional. Los algoritmos que permiten identificar secuencias de aminoácidos relevantes son esenciales para comprender la estructura y función de las proteínas, así como sus interacciones con otras moléculas, como los ligandos. Sin embargo, estos algoritmos suelen enfrentar desafíos significativos en términos de eficiencia y tiempo de procesamiento.
+
+\section{Contexto}
+Los algoritmos para comparar secuencias de aminoácidos suelen apoyarse en técnicas de programación dinámica como la \textit{Longest Common Subsequence} (LCS) para identificar alineamientos significativos. Este enfoque permite capturar coincidencias relevantes sin necesidad de explorar cada subsecuencia de forma explícita, lo que lo convierte en una herramienta ampliamente utilizada en bioinformática para analizar similitudes estructurales y funcionales entre proteínas.
+
+\section{Motivación y problemática}
+La versión inicial de este proyecto recurría a la generación exhaustiva de subsecuencias y a su comparación posterior, lo que producía un crecimiento combinatorio que limitaba la escalabilidad del método. La necesidad de un algoritmo que mantenga la calidad de los patrones pero reduzca drásticamente el número de comparaciones motivó la adopción del enfoque LCS. Replantear el problema en términos de programación dinámica permite acotar la complejidad a $O(nm)$, mejorar el aprovechamiento de la computación paralela y habilitar análisis oportunos en estudios con grandes volúmenes de datos.
+
+\section{Objetivos}
+\paragraph{Objetivo general}
+\begin{itemize}
+    \item Desarrollar una versión paralelizada de un algoritmo para el descubrimiento de patrones estructurales en proteínas
+\end{itemize}
+\paragraph{Objetivos específicos} 
+\begin{itemize}
+    \item Identificar las partes del algoritmo que pueden ser paralelizadas.
+    \item Diseñar un algoritmo que haga uso de hilos para descubrir patrones usando computación paralela.
+    \item Implementar el algoritmo basado en hilos.
+    \item Evaluar el rendimiento del algoritmo en paralelo frente a la versión secuencial.
+\end{itemize}
+
+\section{Metodología}
+
+El desarrollo del proyecto seguirá un enfoque estructurado que combina el método científico y la evaluación cuantitativa para garantizar un proceso riguroso y basado en evidencia. A continuación, se describen las etapas de cada metodología aplicada en el proyecto.
+
+\subsection{Etapas del Método Científico}
+El proyecto se desarrollará siguiendo las etapas clásicas del método científico, asegurando un enfoque sistemático y objetivo:
+
+\paragraph{Observación} Se inicia con la revisión y análisis del algoritmo secuencial existente, identificando el problema central: la explosión combinatoria que limita su eficiencia. Esta etapa implica recopilar datos y entender a fondo el comportamiento actual del algoritmo.
+
+\paragraph{Formulación de hipótesis} Basándose en la observación, se planteará la hipótesis de que la paralelización mediante hilos mejorará significativamente el tiempo de ejecución del algoritmo sin comprometer la calidad de los resultados.
+
+\paragraph{Experimentación} Se implementará la versión paralelizada del algoritmo y se llevarán a cabo experimentos para poner a prueba la hipótesis. Esta etapa incluirá la ejecución del algoritmo bajo diferentes configuraciones, variando el número de hilos y analizando cómo se distribuye la carga de trabajo.
+
+\paragraph{Análisis de resultados} Los datos obtenidos durante la experimentación se analizarán para verificar si la paralelización cumple con las expectativas de mejora de rendimiento. Se compararán los tiempos de ejecución y el uso de recursos entre la versión secuencial y la paralela.
+
+\paragraph{Conclusiones} Basándose en el análisis de los resultados, se extraerán conclusiones sobre la efectividad de la paralelización. Si los resultados son positivos, se documentará el éxito del enfoque; en caso contrario, se propondrán nuevas iteraciones o ajustes.
+
+\subsection{Etapas de la Evaluación Cuantitativa}
+La evaluación cuantitativa complementa el uso del método científico mediante la recolección y análisis de datos numéricos para medir y validar los resultados:
+
+\paragraph{Definición de métricas} Se identificarán las métricas clave, como el tiempo de ejecución y el uso de recursos.
+
+\paragraph{Recolección de datos} Durante la etapa de experimentación, se registrarán los tiempos de ejecución y el uso de recursos del sistema en múltiples escenarios de prueba.
+
+\paragraph{Análisis estadístico} Los datos recolectados serán analizados estadísticamente para identificar patrones, diferencias significativas entre la versión secuencial y paralelizada, y la eficiencia de la paralelización. Este análisis permitirá validar si la paralelización logra mejorar el rendimiento del algoritmo conforme a los objetivos del proyecto.
+
+\paragraph{Interpretación y presentación} Los resultados del análisis cuantitativo se interpretarán y se incluirán en la documentación final del proyecto, mostrando de forma clara el impacto de la paralelización en el rendimiento del algoritmo.
+
+Este enfoque metodológico, que combina el Método Científico con una evaluación cuantitativa detallada, asegura que el proyecto se desarrolle de manera sistemática y objetiva, permitiendo validar de forma rigurosa las mejoras obtenidas y la consecución de los objetivos propuestos.
+
+\section{Plan de Trabajo}
+
+El plan de trabajo del proyecto se estructura en varias etapas que cubren desde el análisis preliminar hasta la documentación y evaluación final. Cada etapa está diseñada para asegurar un desarrollo metódico, con actividades claramente definidas y recursos adecuados para alcanzar los objetivos planteados.
+
+\subsection{Etapa 1: Análisis y Estudio Inicial}
+En esta primera etapa, se realizará un análisis exhaustivo del algoritmo secuencial. El objetivo es entender en profundidad su funcionamiento y detectar las partes críticas que pueden ser paralelizadas para mejorar su eficiencia.
+
+\subsection{Etapa 2: Diseño del Algoritmo Paralelo}
+El diseño del algoritmo paralelo se basará en los resultados obtenidos en la etapa anterior. En esta fase, se planificará cómo distribuir las tareas entre múltiples hilos de forma eficiente, asegurando un balance óptimo de carga. La estrategia de paralelización será desarrollada considerando las mejores prácticas en el uso de hilos en Golang. Se utilizarán referencias de documentación técnica y ejemplos previos de paralelización como base para estructurar un diseño que permita mejorar el rendimiento sin comprometer la precisión de los resultados.
+
+\subsection{Etapa 3: Implementación y Desarrollo}
+La implementación del algoritmo paralelo es una de las etapas más críticas del proyecto. Se llevará a cabo en Golang, aprovechando la capacidad de procesamiento multi-hilo de las herramientas de desarrollo disponibles. Durante esta fase, se trabajará en asegurar la correcta gestión de la concurrencia y en optimizar el código para maximizar la eficiencia de los hilos. Se utilizará un control de versiones como Git para mantener un seguimiento riguroso del progreso y garantizar la integridad del desarrollo.
+
+\subsection{Etapa 4: Pruebas y Validación}
+La etapa de pruebas y validación es esencial para comprobar la efectividad del algoritmo paralelo. Se realizarán pruebas para intentar asegurar la integridad y coherencia de los datos generados. Además, se comparará el rendimiento de la versión paralela con la versión secuencial para cuantificar las mejoras en tiempo de ejecución. Los datos de prueba se obtendrán de bases de datos de proteínas de acceso público, y se utilizarán herramientas de monitoreo de rendimiento para un análisis detallado.
+
+\subsection{Etapa 5: Documentación de la Memoria}
+La documentación del proyecto se realizará de manera meticulosa, incluyendo todos los aspectos del desarrollo, desde los antecedentes y la metodología empleada hasta los resultados obtenidos y las conclusiones. Esta etapa implicará el uso de herramientas de procesamiento de texto como LaTeX para asegurar una presentación profesional y ordenada del contenido. La memoria será un reflejo integral del trabajo realizado, proporcionando una base sólida para su evaluación académica.
+
+\section{Resultados Esperados}
+\paragraph{Objetivos específicos}
+
+\subparagraph{Objetivo Específico 1: Identificar las partes del algoritmo que pueden ser paralelizadas.}
+\begin{itemize}
+    \item \textbf{Resultado Esperado:} Se espera identificar de manera clara las secciones del algoritmo secuencial que presentan alta carga computacional y que pueden beneficiarse de la paralelización.
+    \item \textbf{Pruebas para Lograr Resultado Esperado:} Identificación de cuellos de botella a través de pruebas de rendimiento.
+\end{itemize}
+
+\subparagraph{Objetivo Específico 2: Diseñar un algoritmo que haga uso de hilos para descubrir patrones usando computación paralela.}
+\begin{itemize}
+    \item \textbf{Resultado Esperado:} Se espera tener un diseño detallado y optimizado del algoritmo que divida el trabajo en tareas paralelas de forma efectiva, manteniendo la precisión del análisis.
+    \item \textbf{Pruebas para Lograr Resultado Esperado:} Validación del diseño mediante revisiones por pares y simulaciones de ejecución en entornos controlados para evaluar la distribución de carga y sincronización de los hilos.
+\end{itemize}
+
+\subparagraph{Objetivo Específico 3: Implementar el algoritmo basado en hilos.}
+\begin{itemize}
+    \item \textbf{Resultado Esperado:} Se espera que el algoritmo sea implementado con éxito y que ejecute de forma paralela el cálculo de las matrices LCS y la reconstrucción de patrones sin errores de concurrencia.
+    \item \textbf{Pruebas para Lograr Resultado Esperado:} Ejecuciones de prueba del código en entornos de desarrollo, uso de pruebas unitarias para validar la funcionalidad de cada parte del código, y monitoreo del uso de CPU y memoria durante la ejecución.
+\end{itemize}
+
+\subparagraph{Objetivo Específico 4: Evaluar el rendimiento del algoritmo en paralelo frente a la versión en serie.}
+\begin{itemize}
+    \item \textbf{Resultado Esperado:} Se espera que el algoritmo en paralelo reduzca significativamente el tiempo de procesamiento en al menos un 50\% respecto a la versión en serie, sin comprometer la precisión de los resultados.
+    \item \textbf{Pruebas para Lograr Resultado Esperado:} Comparación de tiempos de ejecución entre la versión paralela y la versión secuencial del algoritmo en diferentes conjuntos de datos de prueba, y análisis de la eficiencia de los hilos en función del número de hilos usados.
+\end{itemize}
+
+
+\section{Solución}
+
+\section{Contribuciones}
+
+
+%% contenido del segundo capítulo
+\chapter{Contexto}
+
+\section{Proteínas, ligandos y cadenas}
+Las definiciones formales de algunos conceptos importantes son:
+\begin{itemize}
+    \item Aminoácidos: Son moléculas que se combinan para formar proteínas.\cite{defLigando}
+    \item Proteínas: Son moléculas grandes y complejas que desempeñan muchas funciones críticas en el cuerpo. Realizan la mayor parte del trabajo en las células y son necesarias para la estructura, función y regulación de los tejidos y órganos del cuerpo.\cite{defProteina}
+    \item Ligandos: Es una sustancia (usualmente una molécula pequeña) que forma un complejo con una biomolécula. En un sentido más estricto, es una molécula que envía una señal al unirse al centro activo de una proteína. \cite{3} Es decir, un ligando es una molécula que se une a una proteína, alterando su estructura y función.
+\end{itemize}
+
+Hay 20 tipos diferentes de aminoácidos que se pueden combinar para formar una proteína. La secuencia de aminoácidos determina la estructura tridimensional única de cada proteína y su función específica \cite{defProteina}.
+
+El Cuadro \ref{tab:aminos} contiene la lista de aminoácidos estándar.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Nombre} & \textbf{Abreviatura} & \textbf{Símbolo} \\
+\hline
+Alanina & Ala & A \\
+Arginina & Arg & R \\
+Asparagina & Asn & N \\
+Aspártico & Asp & D \\
+Cisteína & Cys & C \\
+Fenilalanina & Phe & F \\
+Glicina & Gly & G \\
+Glutámico & Glu & E \\
+Glutamina & Gln & Q \\
+Histidina & His & H \\
+Isoleucina & Ile & I \\
+Leucina & Leu & L \\
+Lisina & Lys & K \\
+Metionina & Met & M \\
+Prolina & Pro & P \\
+Serina & Ser & S \\
+Tirosina & Tyr & Y \\
+Treonina & Thr & T \\
+Triptófano & Trp & W \\
+Valina & Val & V \\
+\hline
+\end{tabular}
+\caption{Lista de aminoácidos estándar.}
+\label{tab:aminos}
+\end{table}
+
+Un ejemplo de una secuencia de proteína, correspondiente a la proteína 5PNQ \cite{prote5PNQ}, es el siguiente:
+
+\begin{verbatim}
+MHHHHHHSSGVDLGTENLYFQSMETMKSKANCAQNPNCNIMIFHPTKEEFNDFDKYIAYMESQG
+AHRAGLAKIIPPKEWKARETYDNISEILIATPLQQVASGRAGVFTQYHKKKKAMTVGEYRHLAN
+SKKYQTPPHQNFEDLERKYWKNRIYNSPIYGADISGSLFDENTKQWNLGHLGTIQDLLEKECGV
+VIEGVNTPYLYFGMWKTTFAWHTEDMDLYSINYLHLGEPKTWYVVPPEHGQRLERLARELFPGS
+SRGCGAFLRHKVALISPTVLKENGIPFNRITQEAGEFMVTFPYGYHAGFNHGFNCAEAINFATP
+RWIDYGKMASQCSCGEARVTFSMDAFVRILQPERYDLWKRGQDR
+\end{verbatim}
+
+Adicionalmente y para facilitar el entendimiento estableceremos el siguiente vocabulario para referirnos a cada parte de la proteína que se obtiene durante el algoritmo:
+\begin{itemize}
+    \item Secuencia: Para referirnos a una proteína completa.
+    \item Segmento: Parte de la proteína que interactúa con un ligando y recortamos.
+    \item Subsecuencia: Fragmento de la proteína generado por el algoritmo para buscar los patrones.
+\end{itemize}
+
+\section{Patrones Proteína-Ligando}
+
+Un patrón proteína-ligando es una secuencia específica de aminoácidos alrededor de un ligando que se repite en múltiples proteínas. Estos patrones representan regiones funcionales donde ocurre la interacción entre la proteína y la molécula del ligando, lo cual es esencial para la actividad biológica de la proteína. La identificación y análisis de estos patrones permiten comprender mejor cómo las proteínas llevan a cabo sus funciones.
+
+La detección de estos patrones es fundamental en diversas áreas, como el diseño de fármacos, donde se busca identificar moléculas que puedan unirse eficazmente a una proteína objetivo para modificar su actividad. También es crucial en la ingeniería de proteínas, donde modificar o diseñar nuevas proteínas con funciones específicas requiere un entendimiento detallado de los patrones de interacción proteína-ligando.
+
+Para representar estos patrones en secuencias proteicas, se utilizan herramientas y notaciones especializadas como la PA Line de PROSITE\cite{manualpaline}, que permite describir patrones complejos de manera concisa y estandarizada. Esta notación facilita la comparación y el análisis de secuencias, permitiendo a los investigadores identificar rápidamente regiones de interés y predecir posibles interacciones funcionales.
+
+\section{Notación PA Line de Prosite}
+Para representar patrones en secuencias proteicas, se utiliza la notación PA Line de PROSITE\cite{manualpaline}, una herramienta ampliamente reconocida en bioinformática.
+
+La notación PA Line es un formato estandarizado que permite describir de manera concisa y precisa los patrones de secuencias. Esta notación utiliza símbolos y reglas específicas para representar aminoácidos individuales, opciones alternativas en una posición dada, repeticiones y rangos de longitud. A continuación, se describen algunos elementos clave de esta notación:\cite{manualpaline}: 
+\begin{itemize}
+    \item \textbf{Código IUPAC}: Se utilizan los códigos de una letra estándar para los aminoácidos.
+    \item \textbf{Posición indefinida}: Se usa el símbolo \texttt{x} para representar cualquier aminoácido en una posición dada.
+    \item \textbf{Ambigüedades}: Se indican mediante corchetes \texttt{[]} enumerando los aminoácidos permitidos en una posición. Ejemplo: \texttt{[ALT]} significa Ala, Leu o Thr. $($por las letras A, L y T$)$
+    \item \textbf{Exclusión de aminoácidos}: Se indica mediante llaves \texttt{\{\}} enumerando los aminoácidos no permitidos en una posición. Ejemplo: \texttt{\{AM\}} significa cualquier aminoácido excepto Ala o Met.
+    \item \textbf{Repetición}: Se denota usando un número o un rango entre paréntesis. Ejemplo: \texttt{x(3)} representa tres posiciones consecutivas ocupadas por cualquier aminoácido, y \texttt{x(2,4)} indica de dos a cuatro posiciones consecutivas de cualquier aminoácido.
+    \item \textbf{Restricciones en los extremos}: Se utiliza el símbolo \texttt{<} para restringir un patrón al extremo N-terminal y \texttt{>} para el extremo C-terminal de una secuencia.
+    \item \textbf{Patrón finalizado}: Un patrón siempre termina con un punto (\texttt{.}).
+    \item \textbf{Ejemplo de patrón}: \texttt{PA [AC]-x-V-x(4)-\{ED\}.} se traduce como: Ala o Cys, seguido de cualquier aminoácido, seguido de Val, seguido de cualquier cuatro aminoácidos, seguido de cualquier aminoácido excepto Glu o Asp.
+\end{itemize}
+
+\section{Métodos para descubrir patrones}
+
+La búsqueda de patrones en secuencias proteicas es una tarea crucial en bioinformática, ya que permite identificar regiones conservadas que pueden ser funcionalmente relevantes, como sitios de unión a ligandos. A continuación, se describen algunos métodos y herramientas clave, incluyendo Pratt y su versión web, y se discute su utilidad para la identificación de patrones proteína-ligando.
+
+\subsection{Pratt}
+
+Pratt  es una herramienta ampliamente utilizada para la identificación de patrones conservados en conjuntos de secuencias proteicas. Mediante la búsqueda de patrones comunes en un conjunto de secuencias.
+
+Pratt utiliza algoritmos que consideran la variabilidad en las secuencias, permitiendo identificar patrones que no necesariamente están perfectamente conservados, pero que presentan similitudes significativas. Esto es especialmente útil en el análisis de familias de proteínas donde la conservación es parcial debido a divergencias evolutivas.
+
+Algunas características clave de Pratt incluyen:
+
+\begin{itemize} 
+    \item \textbf{Flexibilidad en la definición de patrones}: Permite especificar parámetros como la longitud mínima y máxima de los patrones, el número mínimo de secuencias que deben contener el patrón, y la posibilidad de incluir posiciones variables o ambiguas. 
+    \item \textbf{Incorporación de gaps}: Puede manejar espacios en los patrones, lo que es útil cuando los motivos funcionales están separados por regiones variables. 
+     
+    \item \textbf{Salida en formato PROSITE}: Los patrones se presentan en la notación PA Line de PROSITE, facilitando su interpretación y uso en otras herramientas bioinformáticas. \end{itemize}
+
+\subsection{Versión Web de Pratt}
+
+La versión web de PRATT está disponible a través del servidor ExPASy, que es parte del Swiss Institute of Bioinformatics. Esta interfaz web permite a los usuarios ejecutar Pratt sin necesidad de instalar software localmente, facilitando su acceso y uso.
+
+Además, el Protein Data Bank (PDB) ofrece recursos para el análisis de estructuras proteicas, y aunque no proporciona directamente una versión web de Pratt, las secuencias y estructuras disponibles en el PDB pueden ser utilizadas como entrada para Pratt. Los usuarios pueden extraer secuencias de proteínas del PDB y utilizarlas en Pratt para identificar patrones conservados.
+
+Si bien Pratt es una herramienta potente para identificar patrones conservados en secuencias proteicas, no está específicamente diseñada para identificar patrones de interacción proteína-ligando. Los patrones descubiertos por Pratt corresponden a secuencias de aminoácidos que están conservadas entre diferentes proteínas, lo que puede incluir sitios de unión a ligandos si estos sitios están conservados.
+
+La identificación de patrones proteína-ligando requiere información sobre las interacciones específicas entre los aminoácidos de la proteína y el ligando. Esto generalmente implica el análisis de datos estructurales 3D, como los disponibles en el PDB, y el uso de herramientas especializadas que consideran la geometría y las propiedades químicas de la interacción.
+
+\subsection{Método base para descubrir patrones}\label{algoritmooriginal}
+
+Este trabajo se inspira en la propuesta secuencial presentada por \cite{francisco}, pero sustituye la generación exhaustiva de subsecuencias por una formulación basada en la \textit{Longest Common Subsequence}. El objetivo sigue siendo identificar patrones compatibles con la notación Prosite, ahora aprovechando la programación dinámica para reducir la complejidad y permitir una paralelización directa.
+
+A continuación, se detalla el flujo del algoritmo para dos cadenas de aminoácidos de largos \textit{n} y \textit{m}:
+
+\textbf{Paso 1: Construcción de la matriz LCS.}
+Se crea una matriz $L$ de tamaño $(n+1) \times (m+1)$ inicializada en cero. Cada celda $L_{i,j}$ representa la longitud de la LCS entre los prefijos $s_{1..i}$ y $t_{1..j}$. El cálculo se realiza mediante la recurrencia descrita anteriormente y tiene complejidad $O(nm)$.
+
+\textbf{Paso 2: Registro de direcciones.}
+En paralelo con la matriz $L$ se mantiene una matriz $D$ que guarda, para cada celda, las direcciones que preservan la longitud óptima (diagonal, arriba o izquierda). Esta estructura es la base para explorar todas las coincidencias posibles durante el retroceso.
+
+\textbf{Paso 3: Retroceso y recopilación de alineamientos.}
+Comenzando en la celda $(n,m)$ se sigue la información de $D$ para reconstruir los alineamientos que alcanzan la longitud óptima. Cuando se elige un movimiento diagonal se agrega una coincidencia; los movimientos verticales u horizontales incrementan el conteo de huecos. La exploración puede generar múltiples alineamientos que posteriormente se transforman en patrones distintos.
+
+\textbf{Paso 4: Formateo y puntuación.}
+Cada alineamiento se traduce a la notación PA Line, colapsando los huecos consecutivos en expresiones \texttt{x(n)} y manteniendo en mayúsculas los aminoácidos conservados. Finalmente, se calcula la puntuación del patrón para ordenar las alternativas.
+
+\textbf{Ejemplo}
+
+Consideremos las cadenas \texttt{ABCD} y \texttt{AHCD}. La matriz LCS obtenida es:
+
+\[
+\begin{array}{c|ccccc}
+   & - & A & H & C & D \\
+\hline
+-  & 0 & 0 & 0 & 0 & 0 \\
+A  & 0 & 1 & 1 & 1 & 1 \\
+B  & 0 & 1 & 1 & 1 & 1 \\
+C  & 0 & 1 & 1 & 2 & 2 \\
+D  & 0 & 1 & 1 & 2 & 3 \\
+\end{array}
+\]
+
+El valor $L_{4,4} = 3$ indica que la LCS tiene longitud tres. Al retroceder se obtiene el alineamiento \texttt{A-H-C-D}, donde \texttt{A}, \texttt{C} y \texttt{D} corresponden a coincidencias y \texttt{H} representa un hueco de longitud uno respecto de la primera cadena. A partir de esta información se derivan los siguientes patrones:
+
+\begin{itemize}
+    \item \texttt{A-x(1)-C-D}
+    \item \texttt{A}
+    \item \texttt{C-D}
+\end{itemize}
+
+La misma matriz permite recuperar alineamientos alternativos si existen múltiples trayectorias óptimas, lo que se traduce en patrones adicionales.
+
+Aplicando la función de puntuación con $n = 4$ (longitud máxima de los segmentos analizados) se obtiene:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Patrón} & \textbf{Puntuación} \\
+\hline
+A-x(1)-C-D & $1 + 0 \times 4 + 3 \times 4^2 = 49$ \\
+A          & $0 + 0 \times 4 + 1 \times 4^2 = 16$ \\
+C-D        & $0 + 0 \times 4 + 2 \times 4^2 = 32$ \\
+\hline
+\end{tabular}
+\caption{Puntuaciones de patrones derivados de la LCS.}
+\end{table}
+
+\vspace{1em}
+
+El enfoque basado en LCS evita la creación explícita de todas las subcadenas y reduce drásticamente la cantidad de comparaciones necesarias, lo que mejora el rendimiento y la escalabilidad frente al método exhaustivo. Además, facilita la paralelización del cálculo y del retroceso. Sobre esta base se incorporó el análisis de los residuos que interactúan con cada ligando, de modo que el algoritmo solo procese los segmentos biológicamente relevantes.
+
+%% contenido del tercer capítulo
