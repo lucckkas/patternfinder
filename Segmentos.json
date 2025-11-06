@@ -88,5 +88,91 @@
         "ZN_A_401": [
             "CrCgstFcgthrypesHeC"
         ]
+    },
+    "1A1F": {
+        "ZN_A_201": [
+            "CpvesCdrrfsdssnltrHiriH"
+        ],
+        "ZN_A_202": [
+            "CriCmrnfsrsdhlttHirtH"
+        ],
+        "ZN_A_203": [
+            "CdiCgrkfarsderkrHtkiH"
+        ]
+    },
+    "1A1G": {
+        "ZN_A_201": [
+            "CpvesCdrrfsdssnltrHiriH"
+        ],
+        "ZN_A_202": [
+            "CriCmrnfsrsdhlttHirtH"
+        ],
+        "ZN_A_203": [
+            "CdiCgrkfarsderkrHtkiH"
+        ],
+        "DA_B_1": [
+            "R"
+        ],
+        "DG_B_2": [
+            "R"
+        ],
+        "DC_B_3": [
+            "ThtgekpfacdicgrkfaRsdErkR"
+        ],
+        "DG_B_4": [
+            "RnfsrsdhlttHirthtgekpfacdicgrkfaR"
+        ],
+        "DT_B_5": [
+            "RnFsrsdHltthirthtgekpfacdicgrkfaR"
+        ],
+        "DG_B_6": [
+            "IhtgqkpfqcricmrnfSRsdH"
+        ],
+        "DG_B_7": [
+            "RrFsdssnltRHirihtgqkpfqcricmrnfsR"
+        ],
+        "DG_B_8": [
+            "RpyacpvescdRrFsdssnltR"
+        ],
+        "DC_B_9": [
+            "NltR"
+        ],
+        "DG_B_10": [],
+        "DT_B_11": [],
+        "DT_C_51": [
+            "SSnlT"
+        ],
+        "DA_C_52": [
+            "S"
+        ],
+        "DC_C_53": [
+            "F"
+        ],
+        "DG_C_54": [
+            "R"
+        ],
+        "DC_C_55": [
+            "RsD"
+        ],
+        "DC_C_56": [
+            "DhltthirthtgekpfacdicgrkfarS"
+        ],
+        "DC_C_57": [
+            "K"
+        ],
+        "DA_C_58": [
+            "RsD"
+        ],
+        "DC_C_59": [],
+        "DG_C_60": [],
+        "DC_C_61": []
+    },
+    "2COT": {
+        "ZN_A_201": [
+            "CdECGksfshssdlskHrrtH"
+        ],
+        "ZN_A_401": [
+            "CdECGkafiqrshligHhrVH"
+        ]
     }
 }
