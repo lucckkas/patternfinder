@@ -17,19 +17,6 @@ Se extrae el segmento de la secuencia que abarca desde el primer hasta el últim
 \end{algorithm}
  ligando y se muestra al usuario.
 
-\begin{algorithm}[H]
-\caption{Detección de segmento interactuante en la secuencia resaltada}
-\begin{algorithmic}[1]
-\State Utilizar una expresión regular para encontrar el segmento que inicia y termina con una letra mayúscula
-\If{se encuentra una coincidencia}
-    \State Extraer el segmento interactuante (\texttt{interacting\_segment})
-    \State Mostrar el segmento interactuante al usuario
-\Else
-    \State Indicar que no se encontraron residuos que interactúen con el ligando
-\EndIf
-\end{algorithmic}
-\end{algorithm}
-
 
 \paragraph{Ejemplo: Extracción y Presentación del Segmento Interactuante}
 
