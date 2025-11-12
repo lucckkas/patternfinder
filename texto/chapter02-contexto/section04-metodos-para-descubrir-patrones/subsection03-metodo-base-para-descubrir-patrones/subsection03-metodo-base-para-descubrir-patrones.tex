@@ -1,48 +1,32 @@
 \subsection{Método base para descubrir patrones}
 \label{algoritmooriginal}
 
-Este trabajo se inspira en una propuesta secuencial presentada recientemente \cite{francisco}, pero sustituye la generación exhaustiva de subsecuencias por una formulación basada en la \textit{Longest Common Subsequence}. El objetivo sigue siendo identificar patrones compatibles con la notación Prosite, ahora aprovechando la programación dinámica para reducir la complejidad y permitir una paralelización directa.
+Este trabajo se inspira en una propuesta secuencial presentada recientemente \cite{francisco}, que emplea un método exhaustivo de generación de subsecuencias para identificar patrones. El algoritmo original opera mediante tres etapas principales:
 
-A continuación, se detalla el flujo del algoritmo para dos cadenas de aminoácidos de largos \textit{n} y \textit{m}:
+\textbf{Paso 1: Generación exhaustiva mediante máscaras de bits.}
+Para cada secuencia de aminoácidos de longitud $n$, se generan todas las posibles subsecuencias aplicando una máscara de bits. Por ejemplo, para la secuencia \texttt{ABC}, se utilizan las máscaras \texttt{000}, \texttt{001}, \texttt{010}, \texttt{011}, \texttt{100}, \texttt{101}, \texttt{110}, \texttt{111}, generando las subsecuencias \texttt{ABC}, \texttt{ABx}, \texttt{AxC}, \texttt{Axx}, \texttt{xBC}, \texttt{xBx}, \texttt{xxC}, \texttt{xxx}, donde \texttt{x} representa un hueco (gap).
 
-\textbf{Paso 1: Construcción de la matriz LCS.}
-Se crea una matriz $L$ de tamaño $(n+1) \times (m+1)$ inicializada en cero. Cada celda $L_{i,j}$ representa la longitud de la LCS entre los prefijos $s_{1..i}$ y $t_{1..j}$.
+\textbf{Paso 2: Comparación exhaustiva.}
+Se comparan todas las subsecuencias generadas entre sí para identificar coincidencias y alineamientos comunes entre las diferentes secuencias de aminoácidos.
 
-\textbf{Paso 2: Registro de direcciones.}
-Con la matriz $L$ se mantiene una matriz $D$ que guarda, para cada celda, las direcciones que preservan la longitud óptima (diagonal, arriba o izquierda). Esta estructura es la base para explorar todas las coincidencias posibles durante el retroceso.
-
-\textbf{Paso 3: Retroceso y recopilación de alineamientos.}
-Comenzando en la celda $(n,m)$ se sigue la información de $D$ para reconstruir los alineamientos que alcanzan la longitud óptima. Cuando se elige un movimiento diagonal se agrega una coincidencia; los movimientos verticales u horizontales incrementan el conteo de huecos. La exploración puede generar múltiples alineamientos que posteriormente se transforman en patrones distintos.
-
-\textbf{Paso 4: Formateo y puntuación.}
-Cada alineamiento se traduce a la notación PA Line, colapsando los huecos consecutivos en expresiones \texttt{x(n)} y manteniendo en mayúsculas los aminoácidos conservados. Finalmente, se calcula la puntuación del patrón para ordenar las alternativas.
+\textbf{Paso 3: Formateo y asignación de puntuación.}
+Cada patrón identificado se traduce a la notación PA Line, colapsando los huecos consecutivos en expresiones \texttt{x(n)} y manteniendo en mayúsculas los aminoácidos conservados. Finalmente, se calcula una puntuación para cada patrón, dando prioridad a aquellos con mayor cantidad de aminoácidos conservados (mayúsculas), permitiendo ordenar las alternativas.
 
 \textbf{Ejemplo}
 
-Consideremos las cadenas \texttt{ABCD} y \texttt{AHCD}. La matriz LCS obtenida es:
-
-\[
-    \begin{array}{c|ccccc}
-          & - & A & H & C & D \\
-        \hline
-        - & 0 & 0 & 0 & 0 & 0 \\
-        A & 0 & 1 & 1 & 1 & 1 \\
-        B & 0 & 1 & 1 & 1 & 1 \\
-        C & 0 & 1 & 1 & 2 & 2 \\
-        D & 0 & 1 & 1 & 2 & 3 \\
-    \end{array}
-\]
-
-El retroceso desde la celda $(4,4)$ permite reconstruir la LCS \texttt{ACD}, identificando un hueco correspondiente a la letra \texttt{B} en la primera cadena. El patrón resultante en notación PA Line es:
+Consideremos las cadenas \texttt{ABCD} y \texttt{AHCD}. El método exhaustivo generaría todas las posibles subsecuencias de ambas cadenas y compararía cada par para encontrar coincidencias. Entre los patrones resultantes se encontraría:
 
 \begin{itemize}
     \item \texttt{A-x(1)-C-D}
 \end{itemize}
 
-La misma matriz permite recuperar alineamientos alternativos si existen múltiples trayectorias óptimas, lo que se traduce en patrones adicionales de igual longitud.
+Este patrón captura la coincidencia de \texttt{A}, \texttt{C} y \texttt{D}, con un hueco correspondiente a la diferencia entre \texttt{B} y \texttt{H}.
 
 \vspace{1em}
 
-El enfoque basado en LCS evita la creación explícita de todas las subcadenas y reduce drásticamente la cantidad de comparaciones necesarias, lo que mejora el rendimiento y la escalabilidad frente al método exhaustivo. Además, facilita la paralelización del cálculo y del retroceso. Sobre esta base se incorporó el análisis de los residuos que interactúan con cada ligando, de modo que el algoritmo solo procese los segmentos biológicamente relevantes.
+\textbf{Limitaciones y modificaciones.}
+El método original no consideraba los aminoácidos interactuantes con el ligando, procesando secuencias completas sin discriminar qué residuos son biológicamente relevantes para la interacción. Por esta razón, se realizó una primera modificación al algoritmo para incorporar únicamente los aminoácidos que interactúan directamente con cada ligando, reduciendo así el espacio de búsqueda a los segmentos funcionalmente significativos.
+
+Sin embargo, la generación exhaustiva de subsecuencias mediante máscaras de bits tiene una complejidad exponencial $O(2^n)$, lo que limita severamente su escalabilidad a medida que aumenta la longitud de las secuencias o el número de estructuras a analizar. Esta limitación motivó el desarrollo de un nuevo enfoque basado en programación dinámica, descrito en el capítulo siguiente.
 
 %% contenido del tercer capítulo
