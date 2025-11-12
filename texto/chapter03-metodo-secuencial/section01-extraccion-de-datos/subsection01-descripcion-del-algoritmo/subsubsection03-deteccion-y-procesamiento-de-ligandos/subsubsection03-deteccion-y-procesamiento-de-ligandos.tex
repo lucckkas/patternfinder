@@ -1,0 +1,24 @@
+\subsubsection{Detección y Procesamiento de Ligandos}
+
+
+Se verifica si existen ligandos en la estructura y se procesa cada uno de ellos individualmente.
+
+\begin{algorithm}[H]
+\caption{Identificación de aminoácidos interactuantes con ligandos}
+\begin{algorithmic}[1]
+\If{no se encontraron residuos de ligando}
+    \State Terminar el algoritmo
+\EndIf
+\State Obtener códigos únicos de ligandos (\texttt{ligand\_codes})
+\ForAll{código de ligando \texttt{lig\_code} en \texttt{ligand\_codes}}
+    \State Obtener los átomos del ligando actual
+    \State Proceder con la identificación de aminoácidos interactuantes
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+\paragraph{Ejemplo:}
+
+En la proteína \texttt{1znf}, se encontraron los ligandos \texttt{NH2}, \texttt{ACE} y \texttt{ZN}. El algoritmo procesará cada uno de estos ligandos de forma individual.
+

@@ -1,0 +1,52 @@
+\subsection{Recuperación y formateo de patrones}
+
+
+Con la matriz $L$ disponible se realiza el retroceso para reconstruir las subsecuencias comunes y transformarlas a la notación PA Line. El código en Go recorre la matriz en sentido inverso utilizando una pila explícita y un diccionario de memoización que evita recomputar los mismos prefijos. El pseudocódigo siguiente condensa ese comportamiento.
+
+\begin{algorithm}[H]
+\caption{RecuperarYFormatearPatrones}
+\begin{algorithmic}[1]
+\Function{RecuperarYFormatearPatrones}{L, secuenciaA, secuenciaB}
+    \State $n \gets \text{len}(\text{secuenciaA})$
+    \State $m \gets \text{len}(\text{secuenciaB})$
+    \State $memo \gets \text{diccionario vacío}$
+    \State $stack \gets [(n, m, \text{false})]$ \Comment{(i, j, hijosProcesados)}
+    \While{$stack$ no está vacía}
+        \State $(i, j, listo) \gets stack.\text{pop}()$
+        \If{$(i,j) \in memo$}
+            \State \textbf{continue}
+        \EndIf
+        \If{$L[i][j] = 0$}
+            \State $memo[(i,j)] \gets \{\varepsilon\}$
+            \State \textbf{continue}
+        \EndIf
+        \If{\textbf{not} $listo$}
+            \State $stack.\text{push}(i, j, \text{true})$
+            \If{$\text{secuenciaA}[i-1] = \text{secuenciaB}[j-1]$}
+                \State $stack.\text{push}(i-1, j-1, \text{false})$
+            \Else
+                \If{$L[i-1][j] = L[i][j]$}
+                    \State $stack.\text{push}(i-1, j, \text{false})$
+                \EndIf
+                \If{$L[i][j-1] = L[i][j]$}
+                    \State $stack.\text{push}(i, j-1, \text{false})$
+                \EndIf
+            \EndIf
+            \State \textbf{continue}
+        \EndIf
+        \State $memo[(i,j)] \gets \text{CombinarHijos}(i,j)$
+    \EndWhile
+    \State $patrones \gets \text{conjunto vacío}$
+    \For{$s \in memo[(n,m)]$}
+        \State $patrones$.add(\textsc{Formatear}($s$))
+    \EndFor
+    \State \Return $patrones$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Detalle del procedimiento.}
+El diccionario `memo` refleja el map `memo` del código Go: almacena el conjunto de subsecuencias comunes asociado a cada posición $(i,j)$. La pila simula la exploración en profundidad que también se utiliza en la versión no recursiva del repositorio. Si las letras coinciden se avanza en diagonal; de lo contrario se exploran las posiciones superiores e izquierdas cuya longitud coincide con $L[i][j]$. Cuando todas las ramas hijas han sido resueltas, la función \textsc{CombinarHijos} concatena la letra correspondiente en caso de coincidencia o combina los subconjuntos heredados.
+
+\textsc{Formatear} replica la lógica del paquete Go: recorre la subsecuencia cruda carácter a carácter, acumula huecos contiguos en un contador y los emite como \texttt{x(n)} cuando aparece una coincidencia posterior o al finalizar la cadena. Si no se detecta ningún residuo mayúsculo, devuelve $\varnothing$ para descartar patrones vacíos. Las versiones paralelas del código decomponen la exploración de ramas independientes en goroutines, pero el estado compartido sigue siendo la única matriz $L$ junto con el diccionario de memoización sincronizado.
+

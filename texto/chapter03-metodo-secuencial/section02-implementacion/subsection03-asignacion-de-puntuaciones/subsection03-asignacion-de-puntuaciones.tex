@@ -1,0 +1,23 @@
+\subsection{Asignación de Puntuaciones}
+
+
+Cada patrón recuperado se evalúa mediante la misma función de puntuación empleada en la sección anterior. La fórmula toma como base la cantidad de huecos, letras minúsculas y letras mayúsculas:
+
+\[
+\text{Puntuación} = x + m \times n + y \times n^2
+\]
+
+\begin{algorithm}[H]
+\caption{Asignar puntuaciones y ordenar}
+\begin{algorithmic}[1]
+\Function{OrdenarYAsignarPuntuaciones}{patrones, longitudSegmento}
+    \State $puntuaciones \gets []$
+    \For{$\text{patrón} \in patrones$}
+        \State $\text{puntuación} \gets \text{calcularPuntuación}(\text{patrón}, longitudSegmento)$
+        \State $puntuaciones$.add($\text{puntuación}$)
+    \EndFor
+    \State \Return \text{ordenarPorPuntuación}($patrones, puntuaciones$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+

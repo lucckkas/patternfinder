@@ -1,0 +1,17 @@
+\subsection{Formateo de patrones}
+
+
+Cada alineamiento se transforma a la notación PA Line de Prosite. Los aminoácidos conservados se expresan con letras mayúsculas y los huecos se convierten en expresiones \texttt{x(n)}, donde $n$ es la longitud del segmento ausente. Utilizando el alineamiento previo se obtiene:
+
+\begin{itemize}
+    \item \texttt{A-g-C} $\rightarrow$ \texttt{A-x(1)-C}
+    \item \texttt{A} $\rightarrow$ \texttt{A}
+    \item \texttt{C} $\rightarrow$ \texttt{C}
+\end{itemize}
+
+Además, se define una notación complementaria para los casos en que un patrón presenta segmentos ausentes de longitudes $X_i$ observadas pero no de una longitud $X_j$ determinada. En tales situaciones se registran explícitamente las longitudes detectadas; por ejemplo, la notación
+
+\texttt{A-x(1|2|3|5)-C}
+
+indica que el patrón admite un hueco de longitud 1, 2, 3 o 5, y que no se ha observado un hueco de longitud 4.
+

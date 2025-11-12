@@ -1,0 +1,48 @@
+\subsection{Método base para descubrir patrones}
+\label{algoritmooriginal}
+
+Este trabajo se inspira en la propuesta secuencial presentada por \cite{francisco}, pero sustituye la generación exhaustiva de subsecuencias por una formulación basada en la \textit{Longest Common Subsequence}. El objetivo sigue siendo identificar patrones compatibles con la notación Prosite, ahora aprovechando la programación dinámica para reducir la complejidad y permitir una paralelización directa.
+
+A continuación, se detalla el flujo del algoritmo para dos cadenas de aminoácidos de largos \textit{n} y \textit{m}:
+
+\textbf{Paso 1: Construcción de la matriz LCS.}
+Se crea una matriz $L$ de tamaño $(n+1) \times (m+1)$ inicializada en cero. Cada celda $L_{i,j}$ representa la longitud de la LCS entre los prefijos $s_{1..i}$ y $t_{1..j}$. El cálculo se realiza mediante la recurrencia descrita anteriormente y tiene complejidad $O(nm)$.
+
+\textbf{Paso 2: Registro de direcciones.}
+En paralelo con la matriz $L$ se mantiene una matriz $D$ que guarda, para cada celda, las direcciones que preservan la longitud óptima (diagonal, arriba o izquierda). Esta estructura es la base para explorar todas las coincidencias posibles durante el retroceso.
+
+\textbf{Paso 3: Retroceso y recopilación de alineamientos.}
+Comenzando en la celda $(n,m)$ se sigue la información de $D$ para reconstruir los alineamientos que alcanzan la longitud óptima. Cuando se elige un movimiento diagonal se agrega una coincidencia; los movimientos verticales u horizontales incrementan el conteo de huecos. La exploración puede generar múltiples alineamientos que posteriormente se transforman en patrones distintos.
+
+\textbf{Paso 4: Formateo y puntuación.}
+Cada alineamiento se traduce a la notación PA Line, colapsando los huecos consecutivos en expresiones \texttt{x(n)} y manteniendo en mayúsculas los aminoácidos conservados. Finalmente, se calcula la puntuación del patrón para ordenar las alternativas.
+
+\textbf{Ejemplo}
+
+Consideremos las cadenas \texttt{ABCD} y \texttt{AHCD}. La matriz LCS obtenida es:
+
+\[
+    \begin{array}{c|ccccc}
+          & - & A & H & C & D \\
+        \hline
+        - & 0 & 0 & 0 & 0 & 0 \\
+        A & 0 & 1 & 1 & 1 & 1 \\
+        B & 0 & 1 & 1 & 1 & 1 \\
+        C & 0 & 1 & 1 & 2 & 2 \\
+        D & 0 & 1 & 1 & 2 & 3 \\
+    \end{array}
+\]
+
+El retroceso desde la celda $(4,4)$ permite reconstruir la LCS \texttt{ACD}, identificando un hueco correspondiente a la letra \texttt{B} en la primera cadena. El patrón resultante en notación PA Line es:
+
+\begin{itemize}
+    \item \texttt{A-x(1)-C-D}
+\end{itemize}
+
+La misma matriz permite recuperar alineamientos alternativos si existen múltiples trayectorias óptimas, lo que se traduce en patrones adicionales de igual longitud.
+
+\vspace{1em}
+
+El enfoque basado en LCS evita la creación explícita de todas las subcadenas y reduce drásticamente la cantidad de comparaciones necesarias, lo que mejora el rendimiento y la escalabilidad frente al método exhaustivo. Además, facilita la paralelización del cálculo y del retroceso. Sobre esta base se incorporó el análisis de los residuos que interactúan con cada ligando, de modo que el algoritmo solo procese los segmentos biológicamente relevantes.
+
+%% contenido del tercer capítulo

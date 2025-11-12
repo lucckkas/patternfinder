@@ -1,0 +1,10 @@
+\subsection{Recuperación de patrones candidatos}
+
+
+La reconstrucción de los patrones se realiza mediante un recorrido inverso sobre $D$. Cada vez que existen múltiples direcciones posibles se exploran todas las alternativas para obtener alineamientos diferentes. El proceso genera secuencias intermedias en las que se alternan coincidencias exactas con huecos que representan los aminoácidos no compartidos entre ambas cadenas.
+
+En el ejemplo anterior, el retroceso toma una diagonal al encontrar la coincidencia \texttt{C}, avanza hacia arriba para contabilizar un hueco de longitud uno y finaliza con la coincidencia \texttt{A}. El alineamiento resultante se escribe:
+\begin{itemize}
+    \item \texttt{A-C}
+\end{itemize}
+
