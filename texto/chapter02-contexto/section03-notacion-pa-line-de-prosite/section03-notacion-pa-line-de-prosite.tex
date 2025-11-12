@@ -4,11 +4,11 @@ Para representar patrones en secuencias proteicas, se utiliza la notación PA Li
 
 La notación PA Line es un formato estandarizado que permite describir de manera concisa y precisa los patrones de secuencias. Esta notación utiliza símbolos y reglas específicas para representar aminoácidos individuales, opciones alternativas en una posición dada, repeticiones y rangos de longitud. A continuación, se describen algunos elementos clave de esta notación:\cite{manualpaline}:
 \begin{itemize}
-    \item \textbf{Código IUPAC}: Se utilizan los códigos de una letra estándar para los aminoácidos.
-    \item \textbf{Posición indefinida}: Se usa el símbolo \texttt{x} para representar cualquier aminoácido en una posición dada.
-    \item \textbf{Ambigüedades}: Se indican mediante corchetes \texttt{[]} enumerando los aminoácidos permitidos en una posición. Ejemplo: \texttt{[ALT]} significa Ala, Leu o Thr. $($por las letras A, L y T$)$
-    \item \textbf{Exclusión de aminoácidos}: Se indica mediante llaves \texttt{\{\}} enumerando los aminoácidos no permitidos en una posición. Ejemplo: \texttt{\{AM\}} significa cualquier aminoácido excepto Ala o Met.
-    \item \textbf{Repetición}: Se denota usando un número o un rango entre paréntesis. Ejemplo: \texttt{x(3)} representa tres posiciones consecutivas ocupadas por cualquier aminoácido, y \texttt{x(2,4)} indica de dos a cuatro posiciones consecutivas de cualquier aminoácido.
+    \item \textbf{Código IUPAC}: Se utilizan los códigos de una letra estándar para los amino-ácidos.
+    \item \textbf{Posición indefinida}: Se usa el símbolo \texttt{x} para representar cualquier aminoáci-do en una posición dada.
+    \item \textbf{Ambigüedades}: Se indican mediante corchetes \texttt{[]} enumerando los aminoáci-dos permitidos en una posición. Ejemplo: \texttt{[ALT]} significa Ala, Leu o Thr. $($por las letras A, L y T$)$
+    \item \textbf{Exclusión de aminoácidos}: Se indica mediante llaves \texttt{\{\}} enumerando los aminoáci-dos no permitidos en una posición. Ejemplo: \texttt{\{AM\}} significa cualquier aminoácido excepto Ala o Met.
+    \item \textbf{Repetición}: Se denota usando un número o un rango entre paréntesis. Ejemplo: \texttt{x(3)} representa tres posiciones consecutivas ocupadas por cualquier aminoá-cido, y \texttt{x(2,4)} indica de dos a cuatro posiciones consecutivas de cualquier aminoácido.
     \item \textbf{Restricciones en los extremos}: Se utiliza el símbolo \texttt{<} para restringir un patrón al extremo N-terminal y \texttt{>} para el extremo C-terminal de una secuencia.
     \item \textbf{Patrón finalizado}: Un patrón siempre termina con un punto (\texttt{.}).
     \item \textbf{Ejemplo de patrón}: \texttt{PA [AC]-x-V-x(4)-\{ED\}.} se traduce como: Ala o Cys, seguido de cualquier aminoácido, seguido de Val, seguido de cualquier cuatro aminoácidos, seguido de cualquier aminoácido excepto Glu o Asp.

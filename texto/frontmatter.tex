@@ -13,9 +13,9 @@ Agradecimientos a ...
 \listoftables
 
 \begin{resumen}
-La identificación de patrones en proteínas es un desafío clave en bioinformática, esencial para comprender cómo interactúan los aminoácidos con otras moléculas como los ligandos. Las aproximaciones tradicionales que generan todas las subsecuencias posibles sufren un crecimiento combinatorio que limita su uso práctico debido al elevado coste computacional.
+La identificación de patrones en proteínas es un desafío clave en bioinformática, esencial para comprender cómo interactúan los aminoácidos con otras moléculas como los ligandos. Las aproximaciones tradicionales sufren un crecimiento combinatorio que limita su uso práctico debido al elevado coste computacional.
 
-Para abordar esta problemática se desarrolló un algoritmo paralelo basado en la estrategia de la \textit{Longest Common Subsequence} (LCS). La solución reemplaza la enumeración exhaustiva de subsecuencias por una formulación de programación dinámica que calcula las coincidencias sobre una matriz $n \times m$ y permite recuperar alineamientos compatibles con la notación Prosite. La implementación, construida en Golang y apoyada en Biopython para el preprocesamiento, distribuye el cálculo y la reconstrucción de la LCS entre múltiples hilos para reducir los tiempos de búsqueda frente al enfoque secuencial.
+Para abordar esta problemática se desarrolló un algoritmo paralelo basado en la estrategia de la \textit{Longest Common Subsequence} (LCS). La solución reemplaza la enumeración exhaustiva de subsecuencias por una formulación de programación dinámica que calcula las coincidencias sobre una matriz $n \times m$ y permite recuperar alineamientos compatibles con la notación Prosite. La implementación, construida en Go y apoyada en Biopython para el preprocesamiento, distribuye el cálculo y la reconstrucción de la LCS entre múltiples hilos para reducir los tiempos de búsqueda frente al enfoque secuencial.
 
 Si bien el algoritmo LCS-paralelo mitiga la explosión combinatoria del método previo, su eficiencia sigue dependiendo de la longitud de las secuencias, del número de alineamientos necesarios y de las características del hardware disponible. Futuras optimizaciones pueden considerar técnicas avanzadas de poda y heurísticas de alineamiento para escalar a volúmenes aún mayores sin perder precisión biológica.
 
