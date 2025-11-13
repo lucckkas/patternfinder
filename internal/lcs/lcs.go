@@ -77,171 +77,182 @@ func DPTableParallel(sec1, sec2 string) [][]int {
 	return dp
 }
 
-// Backtracking hace el backtracking para encontrar todas las LCS posibles
+// Backtracking hace el backtracking para encontrar todas las LCS posibles.
+// Utiliza detección de caminos duplicados para evitar explorar el mismo camino
+// con el mismo patrón parcial.
 func Backtracking(sec1, sec2 string, matriz [][]int) []string {
-	type key struct{ i, j int }
-	memo := make(map[key]map[string]struct{}) // evita recalcular estados
+	type cellKey struct{ i, j int }
+	
+	// Registro de caminos visitados: para cada celda, guarda los patrones con los que se ha llegado
+	visited := make(map[cellKey]map[string]bool)
+	
+	// Resultados finales
+	results := make(map[string]struct{})
 
 	type frame struct {
-		i, j int
-		done bool
+		i, j    int
+		pattern string
 	}
 
-	stack := []frame{{i: len(sec1), j: len(sec2)}}
+	stack := []frame{{i: len(sec1), j: len(sec2), pattern: ""}}
 
 	for len(stack) > 0 {
 		current := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
-		k := key{current.i, current.j}
+		
+		k := cellKey{i: current.i, j: current.j}
 
-		if _, ok := memo[k]; ok {
-			continue
+		// Verificar si este camino ya fue explorado
+		if visited[k] == nil {
+			visited[k] = make(map[string]bool)
 		}
+		if visited[k][current.pattern] {
+			continue // Este camino ya fue explorado con este patrón
+		}
+		visited[k][current.pattern] = true
 
+		// Caso base: llegamos al origen
 		if matriz[current.i][current.j] == 0 {
-			memo[k] = map[string]struct{}{"": {}}
+			results[current.pattern] = struct{}{}
 			continue
 		}
 
-		if !current.done {
-			// reinsertar el estado indicando que los hijos ya fueron explorados
-			stack = append(stack, frame{i: current.i, j: current.j, done: true})
-
-			if sec1[current.i-1] == sec2[current.j-1] {
-				stack = append(stack, frame{i: current.i - 1, j: current.j - 1})
-				continue
-			}
-
-			if matriz[current.i-1][current.j] == matriz[current.i][current.j] {
-				stack = append(stack, frame{i: current.i - 1, j: current.j})
-			}
-			if matriz[current.i][current.j-1] == matriz[current.i][current.j] {
-				stack = append(stack, frame{i: current.i, j: current.j - 1})
-			}
-			continue
-		}
-
-		res := make(map[string]struct{})
-
+		// Si hay coincidencia de caracteres, avanzamos en diagonal
 		if sec1[current.i-1] == sec2[current.j-1] {
-			for s := range memo[key{current.i - 1, current.j - 1}] {
-				res[s+string(sec1[current.i-1])] = struct{}{}
-			}
-		} else {
-			if matriz[current.i-1][current.j] == matriz[current.i][current.j] {
-				for s := range memo[key{current.i - 1, current.j}] {
-					res[s] = struct{}{}
-				}
-			}
-			if matriz[current.i][current.j-1] == matriz[current.i][current.j] {
-				for s := range memo[key{current.i, current.j - 1}] {
-					res[s] = struct{}{}
-				}
-			}
+			newPattern := string(sec1[current.i-1]) + current.pattern
+			stack = append(stack, frame{
+				i:       current.i - 1,
+				j:       current.j - 1,
+				pattern: newPattern,
+			})
+			continue
 		}
 
-		memo[k] = res
+		// Sin coincidencia: explorar ramas válidas
+		if matriz[current.i-1][current.j] == matriz[current.i][current.j] {
+			stack = append(stack, frame{
+				i:       current.i - 1,
+				j:       current.j,
+				pattern: current.pattern,
+			})
+		}
+		if matriz[current.i][current.j-1] == matriz[current.i][current.j] {
+			stack = append(stack, frame{
+				i:       current.i,
+				j:       current.j - 1,
+				pattern: current.pattern,
+			})
+		}
 	}
 
-	set := memo[key{len(sec1), len(sec2)}]
-	out := make([]string, 0, len(set))
-	for s := range set {
+	// Convertir el conjunto de resultados a slice
+	out := make([]string, 0, len(results))
+	for s := range results {
 		out = append(out, s)
 	}
 	return out
 }
 
 // BacktrackingParallel explora el backtracking de forma concurrente cuando existen ramas independientes.
+// Utiliza detección de caminos duplicados para evitar que múltiples goroutines exploren
+// el mismo camino con el mismo patrón parcial.
 func BacktrackingParallel(sec1, sec2 string, matriz [][]int) []string {
-	type key struct{ i, j int }
-
-	type entry struct {
-		once sync.Once
-		res  map[string]struct{}
+	type cellKey struct{ i, j int }
+	type pathState struct {
+		cell    cellKey
+		pattern string
 	}
 
 	var (
-		memo   = make(map[key]*entry)
-		memoMu sync.Mutex
+		// Registro de caminos visitados: para cada celda, guarda los patrones con los que se ha llegado
+		visited   = make(map[cellKey]map[string]bool)
+		visitedMu sync.Mutex
+		
+		// Resultados finales
+		results   = make(map[string]struct{})
+		resultsMu sync.Mutex
 	)
 
-	getEntry := func(i, j int) *entry {
-		k := key{i: i, j: j}
-		memoMu.Lock()
-		e, ok := memo[k]
-		if !ok {
-			e = &entry{}
-			memo[k] = e
+	// Registra que una goroutine llegó a una celda con un patrón específico
+	// Retorna true si el camino es nuevo, false si ya estaba siendo explorado
+	registerPath := func(i, j int, pattern string) bool {
+		k := cellKey{i: i, j: j}
+		visitedMu.Lock()
+		defer visitedMu.Unlock()
+		
+		if visited[k] == nil {
+			visited[k] = make(map[string]bool)
 		}
-		memoMu.Unlock()
-		return e
+		
+		// Si el patrón ya fue registrado, este camino ya está siendo explorado
+		if visited[k][pattern] {
+			return false
+		}
+		
+		visited[k][pattern] = true
+		return true
 	}
 
-	var compute func(i, j int) map[string]struct{}
-	compute = func(i, j int) map[string]struct{} {
-		e := getEntry(i, j)
-		e.once.Do(func() {
-			if matriz[i][j] == 0 {
-				e.res = map[string]struct{}{"": {}}
-				return
-			}
+	var compute func(i, j int, currentPattern string, wg *sync.WaitGroup)
+	compute = func(i, j int, currentPattern string, wg *sync.WaitGroup) {
+		if wg != nil {
+			defer wg.Done()
+		}
 
-			if i > 0 && j > 0 && sec1[i-1] == sec2[j-1] {
-				prev := compute(i-1, j-1)
-				res := make(map[string]struct{}, len(prev))
-				for s := range prev {
-					res[s+string(sec1[i-1])] = struct{}{}
-				}
-				e.res = res
-				return
-			}
+		// Verificar si este camino ya está siendo explorado
+		if !registerPath(i, j, currentPattern) {
+			// Otra goroutine ya llegó aquí con el mismo patrón, detener esta goroutine
+			return
+		}
 
-			branches := make([]struct{ i, j int }, 0, 2)
-			if i > 0 && matriz[i-1][j] == matriz[i][j] {
-				branches = append(branches, struct{ i, j int }{i - 1, j})
-			}
-			if j > 0 && matriz[i][j-1] == matriz[i][j] {
-				branches = append(branches, struct{ i, j int }{i, j - 1})
-			}
+		// Caso base: llegamos al origen
+		if matriz[i][j] == 0 {
+			resultsMu.Lock()
+			results[currentPattern] = struct{}{}
+			resultsMu.Unlock()
+			return
+		}
 
-			res := make(map[string]struct{})
-			switch len(branches) {
-			case 0:
-				// sin ramas viables, mantenemos conjunto vacío
-			case 1:
-				sub := compute(branches[0].i, branches[0].j)
-				for s := range sub {
-					res[s] = struct{}{}
-				}
-			default:
-				var (
-					wg sync.WaitGroup
-					mu sync.Mutex
-				)
-				for _, br := range branches {
-					br := br
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
-						sub := compute(br.i, br.j)
-						mu.Lock()
-						for s := range sub {
-							res[s] = struct{}{}
-						}
-						mu.Unlock()
-					}()
-				}
-				wg.Wait()
-			}
+		// Si hay coincidencia de caracteres, avanzamos en diagonal
+		if i > 0 && j > 0 && sec1[i-1] == sec2[j-1] {
+			newPattern := string(sec1[i-1]) + currentPattern
+			compute(i-1, j-1, newPattern, nil)
+			return
+		}
 
-			e.res = res
-		})
-		return e.res
+		// Determinar las ramas válidas
+		branches := make([]struct{ i, j int }, 0, 2)
+		if i > 0 && matriz[i-1][j] == matriz[i][j] {
+			branches = append(branches, struct{ i, j int }{i - 1, j})
+		}
+		if j > 0 && matriz[i][j-1] == matriz[i][j] {
+			branches = append(branches, struct{ i, j int }{i, j - 1})
+		}
+
+		switch len(branches) {
+		case 0:
+			// Sin ramas viables, este es un camino inválido
+			return
+		case 1:
+			// Una sola rama, continuar en la misma goroutine
+			compute(branches[0].i, branches[0].j, currentPattern, nil)
+		default:
+			// Múltiples ramas, explorar en paralelo
+			var branchWg sync.WaitGroup
+			for _, br := range branches {
+				branchWg.Add(1)
+				go compute(br.i, br.j, currentPattern, &branchWg)
+			}
+			branchWg.Wait()
+		}
 	}
 
-	set := compute(len(sec1), len(sec2))
-	out := make([]string, 0, len(set))
-	for s := range set {
+	// Iniciar el backtracking desde la esquina inferior derecha
+	compute(len(sec1), len(sec2), "", nil)
+
+	// Convertir el conjunto de resultados a slice
+	out := make([]string, 0, len(results))
+	for s := range results {
 		out = append(out, s)
 	}
 	return out

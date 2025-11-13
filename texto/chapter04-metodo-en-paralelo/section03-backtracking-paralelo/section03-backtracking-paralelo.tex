@@ -1,0 +1,31 @@
+\section{Backtracking paralelo}
+
+El recorrido inverso se maneja mediante \texttt{BacktrackingParallel}, que reconstruye todas las subsecuencias comunes más largas explorando el camino desde la esquina inferior derecha hasta el origen. La función utiliza detección de caminos duplicados para evitar que múltiples goroutines exploren el mismo camino con el mismo patrón parcial, y paraleliza la exploración cuando hay múltiples opciones:
+
+\begin{verbatim}
+Función Backtracking(i, j, patron_parcial):
+    Si otra goroutine ya llegó a (i, j) con el mismo patron_parcial:
+        Detener esta goroutine (ese camino ya está siendo calculado)
+    
+    Registrar que esta goroutine llegó a (i, j) con patron_parcial
+    
+    Si i = 0 o j = 0:
+        Retornar conjunto vacío
+    
+    ramas = determinar_direcciones_validas(i, j)
+    
+    Si hay una sola rama:
+        resultados = Backtracking(rama.i, rama.j, patron_parcial)
+        Agregar carácter actual si corresponde
+    
+    Si hay múltiples ramas:
+        Para cada rama en paralelo:
+            subresultados = Backtracking(rama.i, rama.j, patron_parcial)
+            Combinar subresultados de forma sincronizada
+    
+    Retornar resultados
+\end{verbatim}
+
+Cada rama representa una dirección válida en la matriz (diagonal si hay coincidencia de caracteres, o hacia arriba/izquierda si el valor óptimo proviene de esas celdas). La paralelización ocurre cuando hay bifurcaciones, permitiendo explorar simultáneamente diferentes caminos que generan subsecuencias distintas pero de igual longitud.
+
+El registro de caminos visitados almacena para cada celda $(i,j)$ los patrones parciales con los que se ha llegado. Cuando una goroutine intenta procesar una celda con un patrón que ya está siendo explorado por otra goroutine, se detiene inmediatamente evitando trabajo redundante. Sin embargo, si dos goroutines llegan a la misma celda con patrones parciales diferentes (debido a diferentes secuencias de coincidencias), ambas continúan su exploración ya que representan caminos verdaderamente distintos.

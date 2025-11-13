@@ -1,0 +1,18 @@
+\section{Paralelización de la construcción de la matriz}
+
+La función \texttt{DPTableParallel} paraleliza el llenado de la matriz procesando las diagonales (de arriba-derecha a abajo-izquierda) de forma secuencial, pero calculando todas las celdas de cada diagonal en paralelo. Las celdas en una misma diagonal tienen la propiedad de que sus índices $(i, j)$ suman un valor constante. La estrategia es la siguiente:
+
+\begin{verbatim}
+Para cada diagonal de la matriz:
+    Para cada celda (i,j) en la diagonal:
+        Crear una tarea paralela que:
+            Si sec1[i-1] == sec2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            Sino:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    
+    Esperar a que todas las tareas terminen
+    Continuar con la siguiente diagonal
+\end{verbatim}
+
+La clave está en que cada celda solo depende de valores de la diagonal anterior (ya calculados), permitiendo procesar toda una diagonal de forma concurrente. El mecanismo de sincronización (\texttt{WaitGroup}) garantiza que una diagonal se complete antes de iniciar la siguiente, respetando las dependencias de la programación dinámica.

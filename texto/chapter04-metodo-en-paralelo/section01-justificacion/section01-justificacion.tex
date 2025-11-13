@@ -1,0 +1,3 @@
+\section{Justificación de la paralelización}
+
+En una primera instancia pruebas informales realizadas de manera manual mostraron que, en la versión secuencial, cerca del 95\% del tiempo se consume en la construcción de la matriz LCS, dejando apenas un 5\% para el backtracking. Las etapas posteriores (formateo, unión de gaps) resultan despreciables. Este desequilibrio motivó la decisión de paralelizar tanto la construcción de la matriz como el recorrido inverso, de modo que el cuello de botella principal (el llenado de celdas) pudiese dividirse entre múltiples hilos.

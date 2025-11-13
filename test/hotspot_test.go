@@ -16,7 +16,7 @@ import (
 // para evidenciar qué secciones concentran la mayor carga computacional.
 func TestSequentialHotspots(t *testing.T) {
 	seq1Raw := strings.Repeat("acbdefgHIKLMNPQRSTVWY", 400) + "ACDEFGHIKLMNPQRSTVWY"
-	seq2Raw := strings.Repeat("ghIKLMNPQRSTVWYacbdef", 190) + "ACDFGHIKLMNPQRSTVWY"
+	seq2Raw := strings.Repeat("ghIKLMNPQRSTVWYacbdef", 200) + "ACDFGHIKLMNPQRSTVWY"
 
 	seq1 := utils.UpperOnly(seq1Raw)
 	seq2 := utils.UpperOnly(seq2Raw)

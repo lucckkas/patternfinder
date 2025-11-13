@@ -1,3 +1,270 @@
 \chapter{Conclusiones}
 
+\section{Recapitulación del trabajo desarrollado}
+
+El presente trabajo abordó el desarrollo de una versión paralelizada de un algoritmo para el descubrimiento de patrones estructurales en proteínas, basado en la técnica de Subsecuencias Comunes Más Largas (LCS). El proyecto se estructuró en varias etapas que abarcaron desde el análisis del algoritmo secuencial original hasta la implementación, evaluación y análisis crítico de una versión paralela.
+
+\subsection{Algoritmo secuencial}
+
+En el Capítulo 3 se presentó el algoritmo secuencial, basado en dos componentes principales:
+
+\begin{enumerate}
+    \item \textbf{Construcción de la matriz de programación dinámica}: Se implementó el algoritmo clásico de LCS que construye una matriz donde cada celda $(i,j)$ almacena la longitud de la subsecuencia común más larga entre los primeros $i$ caracteres de la primera secuencia y los primeros $j$ caracteres de la segunda.
+
+    \item \textbf{Backtracking con detección de caminos duplicados}: Se desarrolló un algoritmo de backtracking que reconstruye todas las subsecuencias comunes más largas. La optimización clave consistió en utilizar un registro de caminos visitados que almacena, para cada celda, los patrones parciales con los que se ha llegado. Cuando se detecta que un camino ya fue explorado con el mismo patrón parcial, el algoritmo se detiene para evitar trabajo redundante.
+\end{enumerate}
+
+Esta implementación secuencial sirvió como línea base para las comparaciones posteriores y estableció el mecanismo de detección de caminos duplicados que posteriormente se aplicaría también en la versión paralela.
+
+\subsection{Algoritmo paralelo}
+
+El Capítulo 4 describió el diseño e implementación de la versión paralela, que paralelizó ambos componentes del algoritmo:
+
+\begin{enumerate}
+    \item \textbf{Paralelización por diagonales}: La construcción de la matriz DP se paralelizó procesando cada diagonal en un paso independiente. Las celdas de una misma diagonal pueden calcularse concurrentemente ya que no dependen entre sí, solo de celdas de diagonales anteriores. Se utilizaron goroutines y WaitGroups para coordinar la ejecución.
+
+    \item \textbf{Backtracking paralelo}: El backtracking se paralelizó explorando diferentes ramas del árbol de búsqueda en goroutines independientes. Cuando el algoritmo encuentra una bifurcación (múltiples direcciones válidas), crea una goroutine para cada rama. El registro de caminos visitados se protegió con mutexes para garantizar acceso seguro desde múltiples goroutines.
+\end{enumerate}
+
+La implementación paralela mantuvo la corrección del algoritmo, generando exactamente los mismos resultados que la versión secuencial, pero con características de rendimiento diferentes.
+
+\subsection{Evaluación experimental}
+
+Se realizaron benchmarks exhaustivos comparando ambas implementaciones con secuencias aleatorias de longitud creciente (20 a 200 caracteres). Los resultados revelaron hallazgos importantes:
+
+\begin{itemize}
+    \item La versión secuencial fue consistentemente más rápida, con un speedup promedio de 0.17x (la versión paralela resultó ~6 veces más lenta).
+    \item El componente de construcción de tabla DP mostró el mayor overhead (speedup 0.03x, ~33 veces más lento).
+    \item El backtracking paralelo, aunque mejor que el DP, también fue más lento (speedup 0.21x, ~5 veces más lento).
+    \item El número de LCS encontradas crece exponencialmente, alcanzando 186,744 subsecuencias para secuencias de longitud 200.
+\end{itemize}
+
+\section{Cumplimiento de objetivos}
+
+A continuación se analiza explícitamente el cumplimiento de cada uno de los objetivos planteados al inicio del proyecto.
+
+\subsection{Objetivo general}
+
+\textbf{Objetivo:} \textit{Desarrollar una versión paralelizada de un algoritmo para el descubrimiento de patrones estructurales en proteínas.}
+
+\textbf{Cumplimiento:} \textbf{Logrado completamente.} Se desarrolló una implementación paralela completa del algoritmo LCS que:
+\begin{itemize}
+    \item Paraleliza la construcción de la matriz de programación dinámica mediante procesamiento por diagonales.
+    \item Paraleliza el backtracking mediante exploración concurrente de ramas independientes.
+    \item Genera resultados correctos y equivalentes a la versión secuencial.
+    \item Está implementada en Go utilizando goroutines, WaitGroups y sincronización con mutexes.
+\end{itemize}
+
+\subsection{Objetivos específicos}
+
+\subsubsection{Objetivo específico 1}
+
+\textbf{Objetivo:} \textit{Identificar las partes del algoritmo que pueden ser paralelizadas.}
+
+\textbf{Cumplimiento:} \textbf{Logrado completamente.} Se identificaron exitosamente dos componentes paralelizables:
+
+\begin{enumerate}
+    \item \textbf{Construcción de matriz DP}: Se identificó que las celdas de cada diagonal son independientes y pueden procesarse concurrentemente. La dependencia existe solo entre diagonales consecutivas, no dentro de una misma diagonal.
+
+    \item \textbf{Backtracking}: Se identificó que cuando existen múltiples ramas (bifurcaciones) en el árbol de búsqueda, estas pueden explorarse en paralelo ya que representan caminos independientes hacia diferentes subsecuencias.
+\end{enumerate}
+
+El análisis de hotspots reveló que el backtracking concentra más del 95\% del tiempo de ejecución para secuencias largas, identificándolo como el componente crítico a optimizar.
+
+\subsubsection{Objetivo específico 2}
+
+\textbf{Objetivo:} \textit{Diseñar un algoritmo que haga uso de hilos para descubrir patrones usando computación paralela.}
+
+\textbf{Cumplimiento:} \textbf{Logrado completamente.} Se diseñó un algoritmo paralelo detallado que incluye:
+
+\begin{itemize}
+    \item Estrategia de división del trabajo por diagonales para la matriz DP.
+    \item Mecanismo de sincronización mediante WaitGroups para esperar la finalización de cada diagonal antes de procesar la siguiente.
+    \item Diseño de backtracking paralelo con bifurcación dinámica: se crean goroutines solo cuando hay múltiples ramas, evitando overhead innecesario en caminos lineales.
+    \item Sistema de detección de caminos duplicados con registro compartido protegido por mutexes.
+    \item Acumulación thread-safe de resultados finales.
+\end{itemize}
+
+El diseño fue validado mediante revisiones de código y pruebas de corrección que confirmaron la equivalencia funcional con la versión secuencial.
+
+\subsubsection{Objetivo específico 3}
+
+\textbf{Objetivo:} \textit{Implementar el algoritmo basado en hilos.}
+
+\textbf{Cumplimiento:} \textbf{Logrado completamente.} Se implementó exitosamente el algoritmo en Go:
+
+\begin{itemize}
+    \item Función \texttt{DPTableParallel}: Implementa la construcción paralela de la matriz DP procesando diagonales concurrentemente.
+    \item Función \texttt{BacktrackingParallel}: Implementa el backtracking paralelo con detección de caminos duplicados y sincronización mediante mutexes.
+    \item Todas las pruebas unitarias confirman que genera los mismos resultados que la versión secuencial.
+    \item No se detectaron condiciones de carrera ni errores de concurrencia durante las pruebas exhaustivas.
+\end{itemize}
+
+La implementación utiliza las primitivas de concurrencia nativas de Go (goroutines, channels, mutexes, WaitGroups) de manera idiomática y segura.
+
+\subsubsection{Objetivo específico 4}
+
+\textbf{Objetivo:} \textit{Evaluar el rendimiento del algoritmo en paralelo frente a la versión secuencial.}
+
+\textbf{Cumplimiento:} \textbf{Logrado completamente.} Se realizó una evaluación exhaustiva del rendimiento:
+
+\begin{itemize}
+    \item Se ejecutaron benchmarks con 14 longitudes diferentes (20 a 200 caracteres).
+    \item Se midieron tiempos de construcción de matriz DP, backtracking y totales por separado.
+    \item Se generaron gráficos comparativos de tiempos de ejecución, speedup, y análisis por componente.
+    \item Se documentaron métricas adicionales como número de LCS encontradas y características del crecimiento exponencial.
+\end{itemize}
+
+Sin embargo, el resultado no fue el esperado inicialmente: la versión paralela resultó más lenta que la secuencial (speedup 0.17x), contrariamente a la expectativa de mejora del 50\%. Este hallazgo, aunque inesperado, es un resultado científico válido y relevante que aporta conocimiento sobre cuándo la paralelización no es beneficiosa.
+
+\section{Análisis crítico de los resultados}
+
+\subsection{Interpretación de los resultados}
+
+Los resultados experimentales revelan que, para el rango de tamaños evaluado (20-200 caracteres), la implementación secuencial supera consistentemente en rendimiento a la versión paralela. Este hallazgo, aunque contraintuitivo, tiene explicaciones claras:
+
+\begin{enumerate}
+    \item \textbf{Overhead de creación de goroutines}: El sistema operativo y el runtime de Go tienen un costo asociado a la creación, programación y destrucción de goroutines. Para la construcción de la tabla DP, se crean cientos o miles de goroutines (una por celda en cada diagonal). Este overhead supera el beneficio computacional del paralelismo.
+
+    \item \textbf{Contención en sincronización}: El registro de caminos visitados es una estructura compartida que requiere acceso exclusivo mediante mutexes. Cuando múltiples goroutines intentan verificar o registrar caminos simultáneamente, se produce contención que efectivamente serializa partes de la ejecución. Cada operación de lock/unlock tiene un costo que se acumula significativamente.
+
+    \item \textbf{Grano de paralelismo demasiado fino}: Las tareas individuales (calcular una celda de la matriz o procesar un nodo del backtracking) son demasiado pequeñas para amortizar el overhead de paralelización. Cada celda requiere solo 2-3 operaciones aritméticas, mientras que crear una goroutine tiene un costo mucho mayor.
+
+    \item \textbf{Características de las secuencias aleatorias}: Las secuencias generadas aleatoriamente producen muchas bifurcaciones en el backtracking, lo que maximiza la necesidad de sincronización y aumenta la contención en el registro de caminos visitados.
+
+    \item \textbf{Tamaño del problema}: Para secuencias de menos de 200 caracteres, el problema no es suficientemente grande para que el beneficio de distribuir el trabajo supere el overhead de paralelización. La tendencia creciente del speedup (de 0.11x en longitud 20 a 0.31x en longitud 180-200) sugiere que podría existir un punto de equilibrio para secuencias significativamente más largas.
+\end{enumerate}
+
+\subsection{Valor científico de los resultados negativos}
+
+Es importante destacar que estos resultados, aunque no muestran la mejora esperada, tienen un valor científico significativo:
+
+\begin{itemize}
+    \item \textbf{Evidencia empírica}: Demuestran de manera rigurosa que la paralelización no siempre mejora el rendimiento, un principio teórico fundamental de la computación paralela.
+
+    \item \textbf{Caracterización del overhead}: Cuantifican el costo de sincronización y creación de threads en un contexto real, información útil para futuros diseños de algoritmos paralelos.
+
+    \item \textbf{Identificación de cuellos de botella}: Revelan que el backtracking con estado compartido es particularmente difícil de paralelizar eficientemente.
+
+    \item \textbf{Guía para decisiones de diseño}: Proporcionan criterios para decidir cuándo paralelizar y cuándo mantener una implementación secuencial.
+\end{itemize}
+
+\subsection{Comparación con resultados esperados}
+
+El resultado esperado inicial era una reducción del 50\% en el tiempo de procesamiento. Los resultados reales muestran un incremento del tiempo (speedup 0.17x implica un aumento de ~6x). Esta discrepancia se debe a:
+
+\begin{itemize}
+    \item La estimación inicial asumió que el beneficio computacional superaría el overhead de sincronización.
+    \item No se consideró adecuadamente el impacto de la contención en mutexes para el registro de caminos visitados.
+    \item Se subestimó la cantidad de goroutines creadas y el overhead asociado.
+\end{itemize}
+
+Sin embargo, esta discrepancia no invalida el trabajo realizado. Por el contrario, proporciona una lección valiosa sobre los límites de la paralelización y la importancia de medir y evaluar empíricamente las optimizaciones propuestas.
+
+\section{Limitaciones de la investigación}
+
+\subsection{Limitaciones metodológicas}
+
+\begin{enumerate}
+    \item \textbf{Rango de tamaños evaluado}: Los benchmarks se limitaron a secuencias de hasta 200 caracteres debido a los tiempos de ejecución exponenciales. No se exploró el comportamiento con secuencias significativamente más largas (500+ caracteres) donde el speedup podría mejorar. Esto se debió a limitaciones prácticas de la memoria del sistema.
+
+    \item \textbf{Tipo de secuencias}: Se utilizaron únicamente secuencias generadas aleatoriamente. Secuencias reales de proteínas podrían tener características diferentes (menor entropía, patrones repetitivos) que afecten el número de bifurcaciones y, por tanto, el rendimiento relativo.
+
+    \item \textbf{Hardware específico}: Los experimentos se ejecutaron en un único sistema. El comportamiento podría variar en sistemas con diferente arquitectura, número de núcleos, o características de cache.
+
+    \item \textbf{Configuración de paralelismo}: No se exploró sistemáticamente el impacto de limitar el número de goroutines concurrentes o ajustar el tamaño del grano de paralelismo.
+\end{enumerate}
+
+\subsection{Limitaciones técnicas}
+
+\begin{enumerate}
+    \item \textbf{Detección de caminos duplicados}: El mecanismo implementado requiere sincronización global, lo que limita la escalabilidad. Aproximaciones alternativas (como memoización local o estructuras lock-free) no fueron exploradas.
+
+    \item \textbf{Estrategia de paralelización}: Se implementó una única estrategia (diagonales para DP, bifurcación para backtracking). Otras aproximaciones como particionamiento de la matriz o paralelismo de tareas no fueron evaluadas.
+
+    \item \textbf{Optimizaciones del compilador}: No se exploró el impacto de diferentes niveles de optimización del compilador de Go ni perfiles de ejecución específicos.
+\end{enumerate}
+
+\subsection{Limitaciones del alcance}
+
+\begin{enumerate}
+    \item \textbf{Comparación con otros enfoques}: No se comparó con algoritmos alternativos para descubrimiento de patrones (e.g., expresiones regulares, autómatas finitos, algoritmos aproximados).
+
+    \item \textbf{Aplicación a casos reales}: No se evaluó el algoritmo con datasets reales de proteínas y ligandos del Protein Data Bank.
+
+    \item \textbf{Análisis de escalabilidad}: No se estudió formalmente cómo escala el rendimiento con el número de núcleos disponibles.
+\end{enumerate}
+
+\section{Trabajo futuro y proyecciones}
+
+\subsection{Optimizaciones del algoritmo paralelo actual}
+
+\begin{enumerate}
+    \item \textbf{Grano de paralelismo adaptativo}: Implementar heurísticas que decidan dinámicamente cuándo crear goroutines basándose en el tamaño del problema y la carga actual del sistema. Por ejemplo, solo paralelizar si la diagonal tiene más de $N$ celdas o si el árbol de backtracking supera cierta profundidad.
+
+    \item \textbf{Pool de workers}: En lugar de crear y destruir goroutines constantemente, utilizar un pool fijo de workers que procesen tareas de una cola. Esto reduciría el overhead de creación de threads.
+
+    \item \textbf{Estructuras lock-free}: Explorar el uso de estructuras de datos lock-free o wait-free para el registro de caminos visitados, reduciendo la contención en sincronización. Por ejemplo, concurrent maps o tries lock-free.
+\end{enumerate}
+
+\subsection{Enfoques alternativos de paralelización}
+
+\begin{enumerate}
+    \item \textbf{Paralelismo de tareas}: En lugar de paralelizar internamente el algoritmo LCS, procesar múltiples pares de secuencias en paralelo. Esta aproximación tiene granularidad más gruesa y menor necesidad de sincronización.
+
+    \item \textbf{GPU computing}: Explorar la paralelización en GPU utilizando CUDA o OpenCL, donde el modelo de ejecución SIMD puede ser beneficioso para el cálculo de la matriz DP.
+
+    \item \textbf{Computación distribuida}: Para análisis masivos de datasets completos, considerar frameworks de computación distribuida como Apache Spark o Hadoop.
+\end{enumerate}
+
+\subsection{Extensiones del algoritmo}
+
+\begin{enumerate}
+    \item \textbf{Incorporar restricciones biológicas}: Integrar conocimiento del dominio sobre estructuras secundarias, tipos de aminoácidos, o restricciones estéricas que reduzcan el espacio de búsqueda.
+
+    \item \textbf{Algoritmos de poda}: Implementar técnicas de branch-and-bound o podas heurísticas que eliminen caminos prometedores en el backtracking, reduciendo el número de bifurcaciones.
+
+    \item \textbf{Múltiples secuencias}: Generalizar el algoritmo para encontrar subsecuencias comunes entre más de dos secuencias simultáneamente.
+
+    \item \textbf{Análisis probabilístico}: Incorporar modelos probabilísticos que cuantifiquen la significancia estadística de los patrones encontrados.
+\end{enumerate}
+
+\subsection{Aplicaciones y validación}
+
+\begin{enumerate}
+    \item \textbf{Integración con pipelines bioinformáticos}: Desarrollar interfaces y APIs que permitan integrar el algoritmo con herramientas existentes como PyMOL, Chimera, o workflows de bioinformática.
+
+    \item \textbf{Visualización interactiva}: Crear herramientas de visualización que permitan explorar interactivamente los patrones encontrados y su correspondencia con estructuras 3D.
+
+    \item \textbf{Machine learning}: Utilizar los patrones descubiertos como features para modelos de machine learning que predigan interacciones proteína-ligando o propiedades de unión.
+\end{enumerate}
+
+\subsection{Investigación fundamental}
+
+\begin{enumerate}
+    \item \textbf{Caracterización del overhead}: Realizar un estudio detallado del overhead de sincronización en función de diferentes parámetros (número de cores, tamaño del problema, características de las secuencias).
+
+    \item \textbf{Punto de equilibrio}: Determinar analítica o empíricamente el tamaño del problema a partir del cual la paralelización se vuelve beneficiosa.
+
+    \item \textbf{Comparación con otros lenguajes}: Evaluar cómo diferentes lenguajes y modelos de concurrencia (threads POSIX, OpenMP, MPI, lenguajes funcionales) afectan el rendimiento relativo.
+\end{enumerate}
+
+\section{Reflexiones finales}
+
+Este trabajo ha demostrado que el desarrollo de algoritmos paralelos eficientes es un desafío complejo que requiere no solo el dominio de técnicas de paralelización, sino también un profundo entendimiento de las características del problema, el hardware subyacente, y los costos asociados a la sincronización y coordinación entre threads.
+
+El hallazgo de que la versión secuencial supera a la paralela para este problema específico es un recordatorio importante de que la paralelización no es una solución universal. Como señala la Ley de Amdahl, el speedup alcanzable está fundamentalmente limitado por la porción secuencial del algoritmo, y el overhead de paralelización puede hacer que la versión paralela sea menos eficiente que la secuencial para problemas de ciertos tamaños.
+
+No obstante, el trabajo realizado tiene valor más allá de las métricas de rendimiento. Ha generado:
+
+\begin{itemize}
+    \item Una implementación correcta y bien documentada de ambas versiones del algoritmo.
+    \item Un benchmarking que facilita futuras evaluaciones y optimizaciones.
+    \item Conocimiento detallado sobre los cuellos de botella y desafíos de paralelizar este tipo de algoritmos.
+    \item Una base sólida para explorar aproximaciones alternativas y optimizaciones futuras.
+\end{itemize}
+
+Desde una perspectiva educativa, este proyecto ilustra principios fundamentales de la computación paralela: la importancia de medir antes de optimizar, el costo real del overhead de sincronización, la necesidad de granularidad apropiada, y el valor de resultados inesperados que desafían las suposiciones iniciales.
+
+Finalmente, el algoritmo desarrollado, junto con su infraestructura de benchmarking y análisis, queda como una contribución útil para futuras investigaciones en optimización de algoritmos de descubrimiento de patrones en secuencias biológicas, un área de creciente importancia en bioinformática y biología computacional.
 

@@ -1,0 +1,101 @@
+\section{Ejemplo de ejecución}
+
+Para mostrar el comportamiento de la versión paralela se reutiliza el mismo ejemplo visual del capítulo anterior con las cadenas $S_1 = \texttt{BABCBDABB}$ (ubicada en el eje horizontal superior) y $S_2 = \texttt{DBDCABA}$ (ubicada en el eje vertical). Las diagonales se procesan secuencialmente, pero todas las celdas de cada diagonal se calculan en paralelo; posteriormente, el backtracking paralelo explora las ramas simultáneamente.
+
+\subsection{Llenado de la matriz}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_01.png}
+    \caption{Igual que en el ejemplo secuencial, se inicia con una matriz con la primera fila y columna en ceros.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_02.png}
+    \caption{La primera diagonal es de longitud 1, por lo que solo hay una celda a procesar.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_03.png}
+    \caption{Procesamiento de la diagonal 2, con dos celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_04.png}
+    \caption{Procesamiento de la diagonal 3, con tres celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_05.png}
+    \caption{Procesamiento de la diagonal 4, con cuatro celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_06.png}
+    \caption{Procesamiento de la diagonal 5, con cinco celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_07.png}
+    \caption{Procesamiento de la diagonal 6, con seis celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_08.png}
+    \caption{Procesamiento de la diagonal 7, con siete celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_09.png}
+    \caption{Procesamiento de la diagonal 8, como ya se superó el largo de la secuencia 2, solo hay siete celdas a procesar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_10.png}
+    \caption{Procesamiento de la diagonal 9, con siete celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_11.png}
+    \caption{Procesamiento de la diagonal 10, como ya se superó el largo de la secuencia 1, solo hay seis celdas a procesar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_12.png}
+    \caption{Procesamiento de la diagonal 11, con cinco celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_13.png}
+    \caption{Procesamiento de la diagonal 12, con cuatro celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_14.png}
+    \caption{Procesamiento de la diagonal 13, con tres celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_15.png}
+    \caption{Procesamiento de la diagonal 14, con dos celdas que se pueden completar en paralelo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Par_example/Par_example_full.png}
+    \caption{matriz completa tras procesar todas las diagonales en paralelo. (Igual a la del ejemplo secuencial)}
+\end{figure}
