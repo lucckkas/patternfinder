@@ -8,74 +8,74 @@ El backtracking comienza desde la esquina inferior derecha de la matriz completa
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_01.png}
-    \caption{Inicio del backtracking desde la celda final con el valor máximo de la LCS. Al comparar no hay coincidencia de caracteres, se identifican dos direcciones válidas (arriba e izquierda, ya que ambas tienen el mismo valor), por lo que se crean dos hilos para explorar ambas ramas en paralelo.}
+    \caption[Backtracking paralelo: Inicio y primera bifurcación]{Inicio del backtracking desde la celda final con el valor máximo de la LCS. Al comparar no hay coincidencia de caracteres, se identifican dos direcciones válidas (arriba e izquierda, ya que ambas tienen el mismo valor), por lo que se crean dos hilos para explorar ambas ramas en paralelo.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_02.png}
-    \caption{Segundo paso del backtracking, donde la primera rama que explora la dirección hacia arriba encuentra una coincidencia de caracteres \texttt{B} en ambas secuencias, agregando este carácter a la subsecuencia en construcción. La segunda rama no encuentra coincidencia y genera otra bifurcación.}
+    \caption[Backtracking paralelo: Paso 2 - Coincidencia B y nueva bifurcación]{Segundo paso del backtracking, donde la primera rama que explora la dirección hacia arriba encuentra una coincidencia de caracteres \texttt{B} en ambas secuencias, agregando este carácter a la subsecuencia en construcción. La segunda rama no encuentra coincidencia y genera otra bifurcación.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_03.png}
-    \caption{Tercer paso del backtracking, donde la primera rama no encuentra coincidencia pero hay un maximo valor la izquierda, por lo que continúa en esa dirección. La segunda rama encuentra una coincidencia de caracteres \texttt{B} y agrega este carácter a su subsecuencia. La tercera rama encuentra una coincidencia de caracteres \texttt{A} y agrega este a su subsecuencia.}
+    \caption[Backtracking paralelo: Paso 3 - Tres ramas activas]{Tercer paso del backtracking, donde la primera rama no encuentra coincidencia pero hay un maximo valor la izquierda, por lo que continúa en esa dirección. La segunda rama encuentra una coincidencia de caracteres \texttt{B} y agrega este carácter a su subsecuencia. La tercera rama encuentra una coincidencia de caracteres \texttt{A} y agrega este a su subsecuencia.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_04.png}
-    \caption{Cuarto paso del backtracking, donde la primera rama se encuentra con la segunda rama en la misma celda y como ambas llegan con el mismo patrón parcial (\texttt{B}), la segunda goroutine se detiene ya que ese camino está siendo calculado por la primera. La primera rama continúa y encuentra una coincidencia de caracteres \texttt{A}. La tercera rama no encuentra coincidencia pero encuentra un máximo hacia la izquierda.}
+    \caption[Backtracking paralelo: Paso 4 - Detección de duplicado]{Cuarto paso del backtracking, donde la primera rama se encuentra con la segunda rama en la misma celda y como ambas llegan con el mismo patrón parcial (\texttt{B}), la segunda goroutine se detiene ya que ese camino está siendo calculado por la primera. La primera rama continúa y encuentra una coincidencia de caracteres \texttt{A}. La tercera rama no encuentra coincidencia pero encuentra un máximo hacia la izquierda.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_05.png}
-    \caption{Quinto paso del backtracking, donde la primera rama (combinada) no encuentra coincidencia por lo que se bifurca nuevamente. La tercera rama encuentra una coincidencia de caracteres \texttt{B} y agrega este a su subsecuencia.}
+    \caption[Backtracking paralelo: Paso 5 - Nueva bifurcación]{Quinto paso del backtracking, donde la primera rama (combinada) no encuentra coincidencia por lo que se bifurca nuevamente. La tercera rama encuentra una coincidencia de caracteres \texttt{B} y agrega este a su subsecuencia.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_06.png}
-    \caption{Sexto paso del backtracking, se continua explorando cada rama según las reglas de coincidencia y valores máximos en la matriz.}
+    \caption[Backtracking paralelo: Paso 6 - Exploración múltiple]{Sexto paso del backtracking, se continua explorando cada rama según las reglas de coincidencia y valores máximos en la matriz.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_07.png}
-    \caption{Septimo paso del backtracking, notar que la ramas 2 y 3 llegan a la misma celda pero con diferentes patrones parciales, por lo que no se unifican.}
-\end{figure}
+    \caption[Backtracking paralelo: Paso 7 - Convergencia sin unificación]{Septimo paso del backtracking, notar que la ramas 2 y 3 llegan a la misma celda pero con diferentes patrones parciales, por lo que no se unifican.}
+    \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_08.png}
-    \caption{Octavo paso del backtracking, la rama 1 llega a una celda con valor 0, por lo que detiene su exploración y agrega el patrón completo \texttt{BDAB} a los resultados finales. Las otras ramas continúan explorando.}
-\end{figure}
+    \caption[Backtracking paralelo: Paso 8 - Primera subsecuencia completa (BDAB)]{Octavo paso del backtracking, la rama 1 llega a una celda con valor 0, por lo que detiene su exploración y agrega el patrón completo \texttt{BDAB} a los resultados finales. Las otras ramas continúan explorando.}
+    \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_09.png}
-    \caption{Noveno paso del backtracking, continuación del proceso donde las ramas restantes siguen explorando sus respectivos caminos.}
-\end{figure}
+    \caption[Backtracking paralelo: Paso 9 - Continuación de exploración]{Noveno paso del backtracking, continuación del proceso donde las ramas restantes siguen explorando sus respectivos caminos.}
+    \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_10.png}
-    \caption{Décimo paso del backtracking, la rama 2 llega a una celda con valor 0, deteniendo su exploración y agregando el patrón completo \texttt{BCAB} a los resultados finales. Las ramas restantes continúan explorando.}
-\end{figure}
+    \caption[Backtracking paralelo: Paso 10 - Segunda subsecuencia completa (BCAB)]{Décimo paso del backtracking, la rama 2 llega a una celda con valor 0, deteniendo su exploración y agregando el patrón completo \texttt{BCAB} a los resultados finales. Las ramas restantes continúan explorando.}
+    \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_11.png}
-    \caption{Undecimo paso del backtracking, continuación del proceso donde las últimas ramas siguen explorando su camino restante.}
-\end{figure}
+    \caption[Backtracking paralelo: Paso 11 - Exploración final]{Undecimo paso del backtracking, continuación del proceso donde las últimas ramas siguen explorando su camino restante.}
+    \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Backtracking/Backtracking_example_12.png}
-    \caption{Ultimo paso del backtracking, las ramas 3 y 4 llegan a una celda con valor 0, deteniendo su exploración y agregando los patrones completos \texttt{BCBA} y \texttt{BABA} a los resultados finales.}
-\end{figure}
+    \caption[Backtracking paralelo: Paso 12 - Subsecuencias finales (BCBA y BABA)]{Ultimo paso del backtracking, las ramas 3 y 4 llegan a una celda con valor 0, deteniendo su exploración y agregando los patrones completos \texttt{BCBA} y \texttt{BABA} a los resultados finales.}
+    \end{figure}
 
 
 Durante el proceso, el algoritmo utiliza un registro de caminos visitados para detectar cuando múltiples goroutines intentan explorar el mismo camino con el mismo patrón parcial. Cada posición $(i,j)$ mantiene un conjunto de los patrones parciales con los que ha sido visitada. Cuando una goroutine llega a una celda que ya está siendo procesada por otra goroutine con el mismo patrón, se detiene inmediatamente para evitar trabajo redundante. Sin embargo, si dos goroutines llegan a la misma celda con patrones diferentes, ambas continúan su exploración ya que pueden generar subsecuencias finales distintas.

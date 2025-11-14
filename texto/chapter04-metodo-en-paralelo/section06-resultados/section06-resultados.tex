@@ -17,7 +17,7 @@ La Tabla~\ref{tab:benchmark_summary} presenta un resumen de los resultados para 
 
 \begin{table}[H]
     \centering
-    \caption{Resumen de resultados experimentales para longitudes seleccionadas. Los tiempos están expresados en milisegundos para longitudes $\leq$ 100 y en segundos para longitudes mayores.}
+    \caption[Resumen de resultados experimentales]{Resumen de resultados experimentales para longitudes seleccionadas. Los tiempos están expresados en milisegundos para longitudes $\leq$ 100 y en segundos para longitudes mayores.}
     \label{tab:benchmark_summary}
     \begin{tabular}{|r|r|r|r|r|}
         \hline
@@ -40,7 +40,7 @@ La Figura~\ref{fig:execution_time} muestra la comparación de tiempos de ejecuci
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/Benchmark/execution_time.png}
-    \caption{Comparación de tiempos de ejecución totales entre las implementaciones secuencial y paralela. La escala logarítmica evidencia el crecimiento exponencial del tiempo con la longitud de las secuencias. En todos los casos evaluados, la versión secuencial presenta menores tiempos de ejecución.}
+    \caption[Resultados: Tiempos de ejecución secuencial vs paralelo]{Comparación de tiempos de ejecución totales entre las implementaciones secuencial y paralela. La escala logarítmica evidencia el crecimiento exponencial del tiempo con la longitud de las secuencias. En todos los casos evaluados, la versión secuencial presenta menores tiempos de ejecución.}
     \label{fig:execution_time}
 \end{figure}
 
@@ -53,7 +53,7 @@ El speedup, definido como la razón entre el tiempo secuencial y el tiempo paral
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/Benchmark/speedup.png}
-    \caption{Speedup de la versión paralela respecto a la secuencial. Todos los valores se encuentran por debajo de 1.0, indicando que la implementación secuencial es más eficiente. El speedup promedio observado es de 0.17x, lo que significa que la versión paralela es aproximadamente 6 veces más lenta. La línea punteada roja marca el punto de equilibrio (speedup = 1.0).}
+    \caption[Resultados: Speedup de la versión paralela]{Speedup de la versión paralela respecto a la secuencial. Todos los valores se encuentran por debajo de 1.0, indicando que la implementación secuencial es más eficiente. El speedup promedio observado es de 0.17x, lo que significa que la versión paralela es aproximadamente 6 veces más lenta. La línea punteada roja marca el punto de equilibrio (speedup = 1.0).}
     \label{fig:speedup}
 \end{figure}
 
@@ -66,7 +66,7 @@ Para comprender mejor dónde se concentra el costo computacional, se analizaron 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/Benchmark/components.png}
-    \caption{Comparación de tiempos por componente. Izquierda: construcción de la tabla DP. Derecha: backtracking. El backtracking domina el tiempo total de ejecución, especialmente para secuencias largas. La paralelización de la tabla DP introduce un overhead considerable que supera cualquier beneficio potencial.}
+    \caption[Resultados: Análisis por componentes (DP y Backtracking)]{Comparación de tiempos por componente. Izquierda: construcción de la tabla DP. Derecha: backtracking. El backtracking domina el tiempo total de ejecución, especialmente para secuencias largas. La paralelización de la tabla DP introduce un overhead considerable que supera cualquier beneficio potencial.}
     \label{fig:components}
 \end{figure}
 
@@ -87,7 +87,7 @@ El número de subsecuencias comunes más largas crece exponencialmente con la lo
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/Benchmark/lcs_count.png}
-    \caption{Número de subsecuencias comunes más largas encontradas en función de la longitud de las secuencias. Para secuencias de longitud 200, se encontraron más de 186,000 LCS distintas. Este crecimiento exponencial justifica el incremento dramático en los tiempos de ejecución observados.}
+    \caption[Resultados: Crecimiento exponencial del número de LCS]{Número de subsecuencias comunes más largas encontradas en función de la longitud de las secuencias. Para secuencias de longitud 200, se encontraron más de 186,000 LCS distintas. Este crecimiento exponencial justifica el incremento dramático en los tiempos de ejecución observados.}
     \label{fig:lcs_count}
 \end{figure}
 
