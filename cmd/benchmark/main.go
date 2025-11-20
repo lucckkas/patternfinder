@@ -22,7 +22,7 @@ func generateRandomSequence(length int, seed int64) string {
 }
 
 func main() {
-	lengths := []int{20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200}
+	lengths := []int{20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260}
 
 	// Crear archivo CSV
 	file, err := os.Create("benchmark_results/results.csv")

@@ -163,6 +163,20 @@ func AllGapValuesDistanceTotalViable(seq string, pattern string) ([]map[int]stru
 
 	path := make([]int, L) // índices elegidos para cada letra del patrón
 
+	// Búsqueda binaria para encontrar el primer elemento > minVal
+	findStart := func(arr []int, minVal int) int {
+		left, right := 0, len(arr)
+		for left < right {
+			mid := (left + right) / 2
+			if arr[mid] <= minVal {
+				left = mid + 1
+			} else {
+				right = mid
+			}
+		}
+		return left
+	}
+
 	var dfs func(k int, prev int) bool
 	dfs = func(k int, prev int) bool {
 		// k: posición en el patrón a elegir
@@ -175,22 +189,32 @@ func AllGapValuesDistanceTotalViable(seq string, pattern string) ([]map[int]stru
 			}
 			return true
 		}
-		// iterar ocurrencias viables para pattern[k], respetando orden creciente > prev
+
 		v := occ[k]
-		// avance inicial para mantener a > prev
+		
+		// Búsqueda binaria para encontrar primer v[i] > prev
 		i0 := 0
 		if prev >= 0 {
-			// buscar primer v[i] > prev (lineal; si quieres, haz binaria)
-			for i0 < len(v) && v[i0] <= prev {
-				i0++
-			}
+			i0 = findStart(v, prev)
 		}
+		
+		// Poda: si no hay ocurrencias válidas, retornar false
+		if i0 >= len(v) {
+			return false
+		}
+		
 		okAny := false
 		for i := i0; i < len(v); i++ {
-			path[k] = v[i]
-			// poda de viabilidad futura: aún podemos alcanzar latest[k+1], etc.
-			// (ear/latest ya garantizan que hay al menos una completación posible)
-			if dfs(k+1, v[i]) {
+			currentPos := v[i]
+			path[k] = currentPos
+			
+			// Poda adicional: si la posición actual ya supera o iguala latest del siguiente carácter,
+			// las siguientes posiciones tampoco servirán
+			if k+1 < L && currentPos >= lat[k+1] {
+				break
+			}
+			
+			if dfs(k+1, currentPos) {
 				okAny = true
 			}
 		}

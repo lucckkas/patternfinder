@@ -2,6 +2,7 @@ package lcs
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 )
 
@@ -28,53 +29,78 @@ func DPTable(sec1, sec2 string) [][]int {
 	return dp
 }
 
-// DPTableParallel construye la tabla LCS evaluando cada diagonal en paralelo.
+// DPTableParallel construye la tabla LCS usando paralelismo por diagonales
+// con un pool de workers fijo (bounded goroutines).
 func DPTableParallel(sec1, sec2 string) [][]int {
-	n, m := len(sec1), len(sec2)
-	dp := make([][]int, n+1)
-	for i := range dp {
-		dp[i] = make([]int, m+1)
-	}
+    n, m := len(sec1), len(sec2)
+    dp := make([][]int, n+1)
+    for i := range dp {
+        dp[i] = make([]int, m+1)
+    }
 
-	for diag := 2; diag <= n+m; diag++ {
-		start := 1
-		if diag-m > start {
-			start = diag - m
-		}
-		if start < 1 {
-			start = 1
-		}
+    type cell struct {
+        i, j int
+    }
 
-		end := diag - 1
-		if end > n {
-			end = n
-		}
+    numWorkers := runtime.GOMAXPROCS(0)
+    if numWorkers < 1 {
+        numWorkers = 1
+    }
 
-		var wg sync.WaitGroup
-		for i := start; i <= end; i++ {
-			j := diag - i
-			if j < 1 || j > m {
-				continue
-			}
+    // Recorremos todas las diagonales i+j = const
+    for diag := 2; diag <= n+m; diag++ {
+        // Cálculo de rango [start, end] de i en esta diagonal
+        start := 1
+        if diag-m > start {
+            start = diag - m
+        }
+        if start < 1 {
+            start = 1
+        }
 
-			wg.Add(1)
-			go func(i, j int) {
-				defer wg.Done()
-				if sec1[i-1] == sec2[j-1] {
-					dp[i][j] = dp[i-1][j-1] + 1
-					return
-				}
-				if dp[i-1][j] >= dp[i][j-1] {
-					dp[i][j] = dp[i-1][j]
-					return
-				}
-				dp[i][j] = dp[i][j-1]
-			}(i, j)
-		}
-		wg.Wait()
-	}
+        end := diag - 1
+        if end > n {
+            end = n
+        }
 
-	return dp
+        // Canal de trabajos para esta diagonal
+        jobs := make(chan cell)
+        var wg sync.WaitGroup
+
+        // Lanzamos un número fijo de workers para esta diagonal
+        for w := 0; w < numWorkers; w++ {
+            wg.Add(1)
+            go func() {
+                defer wg.Done()
+                for c := range jobs {
+                    i, j := c.i, c.j
+
+                    if sec1[i-1] == sec2[j-1] {
+                        dp[i][j] = dp[i-1][j-1] + 1
+                    } else if dp[i-1][j] >= dp[i][j-1] {
+                        dp[i][j] = dp[i-1][j]
+                    } else {
+                        dp[i][j] = dp[i][j-1]
+                    }
+                }
+            }()
+        }
+
+        // Enviamos todos los trabajos de la diagonal
+        for i := start; i <= end; i++ {
+            j := diag - i
+            if j < 1 || j > m {
+                continue
+            }
+            jobs <- cell{i: i, j: j}
+        }
+
+        // Cerramos el canal y esperamos a que todos los workers terminen
+        close(jobs)
+        wg.Wait()
+    }
+
+    return dp
 }
 
 // Backtracking hace el backtracking para encontrar todas las LCS posibles.
@@ -153,109 +179,129 @@ func Backtracking(sec1, sec2 string, matriz [][]int) []string {
 	return out
 }
 
-// BacktrackingParallel explora el backtracking de forma concurrente cuando existen ramas independientes.
-// Utiliza detección de caminos duplicados para evitar que múltiples goroutines exploren
-// el mismo camino con el mismo patrón parcial.
+// BacktrackingParallel encuentra todas las LCS usando la matriz de DP,
+// con concurrencia limitada mediante un semáforo (pool acotado de goroutines).
 func BacktrackingParallel(sec1, sec2 string, matriz [][]int) []string {
-	type cellKey struct{ i, j int }
-	type pathState struct {
-		cell    cellKey
-		pattern string
-	}
+    type cellKey struct{ i, j int }
 
-	var (
-		// Registro de caminos visitados: para cada celda, guarda los patrones con los que se ha llegado
-		visited   = make(map[cellKey]map[string]bool)
-		visitedMu sync.Mutex
-		
-		// Resultados finales
-		results   = make(map[string]struct{})
-		resultsMu sync.Mutex
-	)
+    // Caminos visitados: para cada celda, qué patrones ya se han explorado
+    visited := make(map[cellKey]map[string]struct{})
+    var visitedMu sync.Mutex
 
-	// Registra que una goroutine llegó a una celda con un patrón específico
-	// Retorna true si el camino es nuevo, false si ya estaba siendo explorado
-	registerPath := func(i, j int, pattern string) bool {
-		k := cellKey{i: i, j: j}
-		visitedMu.Lock()
-		defer visitedMu.Unlock()
-		
-		if visited[k] == nil {
-			visited[k] = make(map[string]bool)
-		}
-		
-		// Si el patrón ya fue registrado, este camino ya está siendo explorado
-		if visited[k][pattern] {
-			return false
-		}
-		
-		visited[k][pattern] = true
-		return true
-	}
+    // Resultados finales (LCS distintas)
+    results := make(map[string]struct{})
+    var resultsMu sync.Mutex
 
-	var compute func(i, j int, currentPattern string, wg *sync.WaitGroup)
-	compute = func(i, j int, currentPattern string, wg *sync.WaitGroup) {
-		if wg != nil {
-			defer wg.Done()
-		}
+    var wg sync.WaitGroup
 
-		// Verificar si este camino ya está siendo explorado
-		if !registerPath(i, j, currentPattern) {
-			// Otra goroutine ya llegó aquí con el mismo patrón, detener esta goroutine
-			return
-		}
+    // Semáforo para limitar número máximo de goroutines concurrentes
+    maxGoroutines := runtime.GOMAXPROCS(0)
+    if maxGoroutines < 1 {
+        maxGoroutines = 1
+    }
+    // Puedes multiplicar por un factor si quieres más paralelismo profundidad-abajo
+    sem := make(chan struct{}, maxGoroutines*4)
 
-		// Caso base: llegamos al origen
-		if matriz[i][j] == 0 {
-			resultsMu.Lock()
-			results[currentPattern] = struct{}{}
-			resultsMu.Unlock()
-			return
-		}
+    // Función auxiliar para registrar si ya se visitó (i,j) con cierto patrón
+    registerPath := func(i, j int, pattern string) bool {
+        k := cellKey{i: i, j: j}
+        visitedMu.Lock()
+        defer visitedMu.Unlock()
 
-		// Si hay coincidencia de caracteres, avanzamos en diagonal
-		if i > 0 && j > 0 && sec1[i-1] == sec2[j-1] {
-			newPattern := string(sec1[i-1]) + currentPattern
-			compute(i-1, j-1, newPattern, nil)
-			return
-		}
+        m, ok := visited[k]
+        if !ok {
+            m = make(map[string]struct{})
+            visited[k] = m
+        }
+        if _, exists := m[pattern]; exists {
+            return false
+        }
+        m[pattern] = struct{}{}
+        return true
+    }
 
-		// Determinar las ramas válidas
-		branches := make([]struct{ i, j int }, 0, 2)
-		if i > 0 && matriz[i-1][j] == matriz[i][j] {
-			branches = append(branches, struct{ i, j int }{i - 1, j})
-		}
-		if j > 0 && matriz[i][j-1] == matriz[i][j] {
-			branches = append(branches, struct{ i, j int }{i, j - 1})
-		}
+    var compute func(i, j int, pattern string)
 
-		switch len(branches) {
-		case 0:
-			// Sin ramas viables, este es un camino inválido
-			return
-		case 1:
-			// Una sola rama, continuar en la misma goroutine
-			compute(branches[0].i, branches[0].j, currentPattern, nil)
-		default:
-			// Múltiples ramas, explorar en paralelo
-			var branchWg sync.WaitGroup
-			for _, br := range branches {
-				branchWg.Add(1)
-				go compute(br.i, br.j, currentPattern, &branchWg)
-			}
-			branchWg.Wait()
-		}
-	}
+    compute = func(i, j int, pattern string) {
+        defer wg.Done()
 
-	// Iniciar el backtracking desde la esquina inferior derecha
-	compute(len(sec1), len(sec2), "", nil)
+        // Caso base: borde de la tabla → patrón completo
+        if i == 0 || j == 0 {
+            resultsMu.Lock()
+            results[pattern] = struct{}{}
+            resultsMu.Unlock()
+            return
+        }
 
-	// Convertir el conjunto de resultados a slice
-	out := make([]string, 0, len(results))
-	for s := range results {
-		out = append(out, s)
-	}
-	return out
+        curr := matriz[i][j]
+
+        // Coincidencia de caracteres ⇒ movemos en diagonal y agregamos caracter
+        if sec1[i-1] == sec2[j-1] {
+            newPattern := string(sec1[i-1]) + pattern
+            if !registerPath(i-1, j-1, newPattern) {
+                return
+            }
+
+            wg.Add(1)
+            // Intentar ejecutar en goroutine si hay cupo en el semáforo
+            select {
+            case sem <- struct{}{}:
+                go func() {
+                    defer func() { <-sem }()
+                    compute(i-1, j-1, newPattern)
+                }()
+            default:
+                // Sin cupo: seguir de forma secuencial
+                compute(i-1, j-1, newPattern)
+            }
+            return
+        }
+
+        // En caso de no coincidencia, pueden existir hasta dos ramas:
+        // arriba (i-1, j) y/o izquierda (i, j-1), manteniendo el valor curr.
+
+        // Helper para lanzar una rama con patrón actual
+        runBranch := func(ni, nj int) {
+            if !registerPath(ni, nj, pattern) {
+                return
+            }
+            wg.Add(1)
+            select {
+            case sem <- struct{}{}:
+                go func() {
+                    defer func() { <-sem }()
+                    compute(ni, nj, pattern)
+                }()
+            default:
+                compute(ni, nj, pattern)
+            }
+        }
+
+        if i > 0 && matriz[i-1][j] == curr {
+            runBranch(i-1, j)
+        }
+        if j > 0 && matriz[i][j-1] == curr {
+            runBranch(i, j-1)
+        }
+    }
+
+    // Lanzar el backtracking desde la esquina inferior derecha
+    // con patrón vacío
+    if !registerPath(len(sec1), len(sec2), "") {
+        // Técnicamente no debería pasar, pero por si acaso
+        return nil
+    }
+
+    wg.Add(1)
+    compute(len(sec1), len(sec2), "")
+    wg.Wait()
+
+    // Convertir el conjunto de resultados a slice
+    out := make([]string, 0, len(results))
+    for s := range results {
+        out = append(out, s)
+    }
+    return out
 }
 
 func PrintDP(sec1, sec2 string, dp [][]int) {
