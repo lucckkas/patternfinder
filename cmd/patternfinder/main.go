@@ -75,7 +75,15 @@ func main() {
 			continue
 		}
 		union := aggregate.PairUnionSets(setsX, setsY)
-		formatted := aggregate.FormatPatternWithValues(pat, union)
-		fmt.Printf("[%d] %s | vals=%v | %s\n", idx+1, pat, union, formatted)
+
+		// Generar todas las combinaciones de patrones
+		combinations := aggregate.ExpandPatternCombinations(pat, union)
+
+		fmt.Printf("[%d] Patrón base: %s | valores: %v\n", idx+1, pat, union)
+		fmt.Printf("    Combinaciones (%d):\n", len(combinations))
+		for i, comb := range combinations {
+			fmt.Printf("    [%d.%d] %s\n", idx+1, i+1, comb)
+		}
+		fmt.Println()
 	}
 }

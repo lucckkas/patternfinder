@@ -1,3 +1,0 @@
-=== RUN   TestSequentialVsParallelComparison
-    benchmark_test.go:72: Iniciando comparación secuencial vs paralelo...
-    benchmark_test.go:73: ========================================

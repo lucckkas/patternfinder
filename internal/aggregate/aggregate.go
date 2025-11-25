@@ -113,3 +113,74 @@ func PairUnionSets(setsX, setsY []map[int]struct{}) []GapValues {
 	}
 	return out
 }
+
+// ExpandPatternCombinations genera todas las combinaciones posibles de patrones
+// a partir de un patrón base y sus valores de gaps.
+// Por ejemplo, si tenemos A con gaps [[2,4], [3,5]], genera:
+// - A-x(2)-B-x(3)-C
+// - A-x(2)-B-x(5)-C
+// - A-x(4)-B-x(3)-C
+// - A-x(4)-B-x(5)-C
+func ExpandPatternCombinations(pattern string, gapValues []GapValues) []string {
+	if len(pattern) == 0 {
+		return []string{""}
+	}
+
+	// Si no hay gaps o el patrón tiene solo una letra, retornar el patrón solo
+	if len(pattern) <= 1 || len(gapValues) == 0 {
+		return []string{pattern}
+	}
+
+	// Calcular el número total de combinaciones
+	totalCombinations := 1
+	for i := 0; i < len(gapValues) && i < len(pattern)-1; i++ {
+		if len(gapValues[i].Values) == 0 {
+			// Si un gap no tiene valores, usar 0 como default
+			totalCombinations *= 1
+		} else {
+			totalCombinations *= len(gapValues[i].Values)
+		}
+	}
+
+	if totalCombinations == 0 {
+		return []string{pattern}
+	}
+
+	result := make([]string, 0, totalCombinations)
+
+	// Función recursiva para generar combinaciones
+	var generate func(pos int, current string, gapIndex int)
+	generate = func(pos int, current string, gapIndex int) {
+		// pos: posición actual en el patrón
+		// current: string que estamos construyendo
+		// gapIndex: índice del gap actual en gapValues
+
+		if pos >= len(pattern) {
+			result = append(result, current)
+			return
+		}
+
+		// Agregar la letra actual
+		current += string(pattern[pos])
+
+		// Si no es la última letra, agregar el gap
+		if pos+1 < len(pattern) {
+			if gapIndex < len(gapValues) && len(gapValues[gapIndex].Values) > 0 {
+				// Probar con cada valor posible del gap
+				for _, val := range gapValues[gapIndex].Values {
+					gapStr := fmt.Sprintf("-x(%d)-", val)
+					generate(pos+1, current+gapStr, gapIndex+1)
+				}
+			} else {
+				// Si no hay valores para este gap, usar "-"
+				generate(pos+1, current+"-", gapIndex+1)
+			}
+		} else {
+			// Última letra, terminar
+			generate(pos+1, current, gapIndex)
+		}
+	}
+
+	generate(0, "", 0)
+	return result
+}
