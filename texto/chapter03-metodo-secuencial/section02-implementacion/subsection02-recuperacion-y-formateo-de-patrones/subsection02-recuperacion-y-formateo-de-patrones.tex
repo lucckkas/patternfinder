@@ -1,0 +1,54 @@
+\subsection{Recuperación y formateo de patrones}
+
+
+Con la matriz $L$ disponible se realiza el retroceso para reconstruir las subsecuencias comunes y transformarlas a la notación PA Line. El código en Go recorre la matriz en sentido inverso utilizando una pila explícita y un registro de caminos visitados que evita explorar el mismo camino con el mismo patrón parcial. El pseudocódigo siguiente condensa ese comportamiento.
+
+\begin{algorithm}[H]
+\caption{RecuperarYFormatearPatrones}
+\begin{algorithmic}[1]
+\Function{RecuperarYFormatearPatrones}{L, secuenciaA, secuenciaB}
+    \State $n \gets \text{len}(\text{secuenciaA})$
+    \State $m \gets \text{len}(\text{secuenciaB})$
+    \State $visitados \gets \text{diccionario de conjuntos vacío}$
+				\State $resultados \gets \text{conjunto vacío}$
+				\State $stack \gets [(n, m, "", \text{false})]$ \Comment{(i, j, patrón, hijosProcesados)}
+    \While{$stack$ no está vacía}
+        \State $(i, j, patron, listo) \gets stack.\text{pop}()$
+								\If{$patron \in visitados[(i,j)]$}
+								\State \textbf{continue} \Comment{Este camino ya fue explorado}
+        \EndIf
+        \State $visitados[(i,j)].\text{add}(patron)$
+        \If{$L[i][j] = 0$}
+            \State $resultados.\text{add}(patron)$
+            \State \textbf{continue}
+        \EndIf
+        \If{\textbf{not} $listo$}
+            \State $stack.\text{push}(i, j, patron, \text{true})$
+            \If{$\text{secuenciaA}[i-1] = \text{secuenciaB}[j-1]$}
+                \State $nuevo\_patron \gets \text{secuenciaA}[i-1] + patron$
+																\State $stack.\text{push}(i-1, j-1, nuevo\_patron, \text{false})$
+            \Else
+                \If{$L[i-1][j] = L[i][j]$}
+                    \State $stack.\text{push}(i-1, j, patron, \text{false})$
+                \EndIf
+                \If{$L[i][j-1] = L[i][j]$}
+                    \State $stack.\text{push}(i, j-1, patron, \text{false})$
+                \EndIf
+            \EndIf
+            \State \textbf{continue}
+        \EndIf
+    \EndWhile
+    \State $patrones \gets \text{conjunto vacío}$
+    \For{$s \in resultados$}
+        \State $patrones$.add(\textsc{Formatear}($s$))
+    \EndFor
+    \State \Return $patrones$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Detalle del procedimiento.}
+El diccionario `visitados` almacena para cada posición $(i,j)$ el conjunto de patrones parciales con los que se ha llegado. La pila simula la exploración en profundidad, pero ahora cada elemento incluye el patrón construido hasta ese punto. Si las letras coinciden se avanza en diagonal y se concatena la letra al patrón; de lo contrario se exploran las posiciones superiores e izquierdas cuya longitud coincide con $L[i][j]$ manteniendo el mismo patrón parcial. Cuando se llega al origen ($L[i][j] = 0$), el patrón completo se agrega a los resultados finales. La detección de caminos duplicados ocurre verificando si ya se ha visitado la celda $(i,j)$ con el mismo patrón parcial: si es así, se evita reexplorar ese camino ya que conduciría al mismo resultado.
+
+\textsc{Formatear} replica la lógica del paquete Go: recorre la subsecuencia cruda carácter a carácter, acumula huecos contiguos en un contador y los emite como \texttt{x(n)} cuando aparece una coincidencia posterior o al finalizar la cadena. Si no se detecta ningún residuo mayúsculo, devuelve $\varnothing$ para descartar patrones vacíos. Las versiones paralelas del código decomponen la exploración de ramas independientes en goroutines, pero el estado compartido sigue siendo la única matriz $L$ junto con el registro de caminos visitados sincronizado mediante mutexes.
+

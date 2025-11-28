@@ -1,0 +1,131 @@
+\subsection{Ejemplo ilustrativo del llenado de la matriz LCS}
+
+Para ilustrar el llenado paso a paso de la matriz LCS se utilizan las cadenas $S_1 = \texttt{BABCBDABB}$ (ubicada en el eje horizontal superior) y $S_2 = \texttt{DBDCABA}$ (ubicada en el eje vertical). Las imágenes muestran una matriz de $11 \times 9$ celdas en la que la primera fila y la primera columna corresponden a los caracteres de las cadenas. Cada figura captura un instante específico del proceso.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_01.png}
+    \caption[Ejemplo secuencial: Matriz inicial vacía]{Matriz vacía con las cadenas ubicadas en la fila y columna inicial; sirve como plantilla para los cálculos posteriores. No son parte de la matriz LCS, solo referencias visuales.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_02.png}
+    \caption[Ejemplo secuencial: Condición base]{Primera fila y columna rellenas con cero, estableciendo la condición base del algoritmo.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_03.png}
+    \caption[Ejemplo secuencial: Paso 1 - D vs B]{Se completa la segunda fila (tercera si consideramos la fila de la cadena pero esta es solo ilustrativa) comparando la primera letra de $S_2$ (\texttt{D}) con cada símbolo de $S_1$ (\texttt{B} en este primer paso).}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_04.png}
+    \caption[Ejemplo secuencial: Paso 2 - D vs A]{Segundo paso: la primera letra de $S_2$ (\texttt{D}) se compara con la segunda letra de $S_1$ (\texttt{A}), heredando el máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_05.png}
+    \caption[Ejemplo secuencial: Paso 3 - D vs B]{tercer paso: la letra \texttt{D} de $S_2$ se compara con la tercera letra de $S_1$ (\texttt{B}), manteniendo el valor máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_06.png}
+    \caption[Ejemplo secuencial: Paso 4 - D vs C]{cuarto paso: la letra \texttt{D} de $S_2$ se compara con la cuarta letra de $S_1$ (\texttt{C}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_07.png}
+    \caption[Ejemplo secuencial: Paso 5 - D vs B]{Quinto paso: la letra \texttt{D} de $S_2$ se compara con la quinta letra de $S_1$ (\texttt{B}), manteniendo el valor máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_08.png}
+    \caption[Ejemplo secuencial: Paso 6 - D vs D (coincidencia)]{Sexto paso: la letra \texttt{D} de $S_2$ se compara con la sexta letra de $S_1$ (\texttt{D}), generando una coincidencia y aumentando la diagonal en 1.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_09.png}
+    \caption[Ejemplo secuencial: Paso 7 - D vs A]{Séptimo paso: la letra \texttt{D} de $S_2$ se compara con la séptima letra de $S_1$ (\texttt{A}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_10.png}
+    \caption[Ejemplo secuencial: Paso 8 - D vs B]{Octavo paso: la letra \texttt{D} de $S_2$ se compara con la octava letra de $S_1$ (\texttt{B}), manteniendo el valor máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_11.png}
+    \caption[Ejemplo secuencial: Paso 9 - D vs B]{Noveno paso: la letra \texttt{D} de $S_2$ se compara con la novena letra de $S_1$ (\texttt{B}), heredando el máximo entre izquierda y arriba.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_12.png}
+    \caption[Ejemplo secuencial: Paso 10 - B vs B (coincidencia)]{Décimo paso: se completó la segunda fila (tercera si consideramos la fila de la cadena pero esta es solo ilustrativa), pasamos a la siguiente letra de $S_2$ (\texttt{B}) comparamos con la primera letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_13.png}
+    \caption[Ejemplo secuencial: Paso 11 - B vs A]{Un décimo primer paso: la letra \texttt{B} de $S_2$ se compara con la segunda letra de $S_1$ (\texttt{A}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_14.png}
+    \caption[Ejemplo secuencial: Paso 12 - B vs B (coincidencia)]{Un décimo segundo paso: la letra \texttt{B} de $S_2$ se compara con la tercera letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_15.png}
+    \caption[Ejemplo secuencial: Paso 13 - B vs C]{Un décimo tercer paso: la letra \texttt{B} de $S_2$ se compara con la cuarta letra de $S_1$ (\texttt{C}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_16.png}
+    \caption[Ejemplo secuencial: Paso 14 - B vs B (coincidencia)]{Un décimo cuarto paso: la letra \texttt{B} de $S_2$ se compara con la quinta letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_17.png}
+    \caption[Ejemplo secuencial: Paso 15 - B vs D]{Un décimo quinto paso: la letra \texttt{B} de $S_2$ se compara con la sexta letra de $S_1$ (\texttt{D}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_18.png}
+    \caption[Ejemplo secuencial: Paso 16 - B vs A]{Un décimo sexto paso: la letra \texttt{B} de $S_2$ se compara con la séptima letra de $S_1$ (\texttt{A}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_19.png}
+    \caption[Ejemplo secuencial: Paso 17 - B vs B (coincidencia)]{Un décimo séptimo paso: la letra \texttt{B} de $S_2$ se compara con la octava letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_20.png}
+    \caption[Ejemplo secuencial: Paso 18 - B vs B (coincidencia)]{Un décimo octavo paso: la letra \texttt{B} de $S_2$ se compara con la novena letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
+    \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_full.png}
+    \caption[Ejemplo secuencial: Matriz completa]{Matriz LCS completa después de procesar todas las letras de ambas cadenas. El valor en la esquina inferior derecha (4) indica la longitud de la subsecuencia común más larga (o las más largas) entre $S_1$ y $S_2$.}
+    \end{figure}
+
+El proceso de recuperar las subsecuencias comunes a partir de la matriz LCS no se ilustra aquí, pero se puede consultar en la versión paralela del algoritmo (con la diferencia de que en el caso secuencial se guardan las coincidencias para su posterior análisis).

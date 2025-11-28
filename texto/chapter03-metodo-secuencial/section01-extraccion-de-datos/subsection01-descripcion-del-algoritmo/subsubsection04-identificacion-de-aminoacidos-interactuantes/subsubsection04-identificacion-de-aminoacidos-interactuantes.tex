@@ -1,0 +1,21 @@
+\subsubsection{Identificación de Aminoácidos Interactuantes}
+
+
+Utilizando un algoritmo de búsqueda de vecinos (NeighborSearch), se identifican los aminoácidos de la proteína que interactúan con el ligando, basándose en el umbral de distancia definido. Esto consiste en comparar la distancia de cada átomo del ligando con los átomos de la proteína y determinar si algún átomo del aminoácido está a una distancia menor al umbral. Un residuo se considera interactuante si al menos uno de sus átomos está dentro del umbral de distancia respecto a cualquier átomo del ligando.
+
+\begin{algorithm}[H]
+\caption{Búsqueda de residuos interactuantes con ligandos}
+\begin{algorithmic}[1]
+\State Crear una búsqueda de vecinos (\texttt{NeighborSearch}) con los átomos de proteína
+\State Inicializar un conjunto de residuos que interactúan (\texttt{interacting\_residues})
+\ForAll{átomo en los átomos del ligando}
+    \State Buscar residuos vecinos dentro del umbral de distancia
+    \State Añadir estos residuos a \texttt{interacting\_residues}
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Ejemplo: Identificación de Aminoácidos Interactuantes}
+
+Al procesar el ligando \texttt{NH2} de la proteína \texttt{1znf}, el algoritmo identifica los aminoácidos que se encuentran dentro de 4.0 \AA\ de cualquier átomo del ligando. Los aminoácidos identificados corresponden a los aminoácidos \texttt{H}, \texttt{K} y \texttt{N} al final de la secuencia.
+

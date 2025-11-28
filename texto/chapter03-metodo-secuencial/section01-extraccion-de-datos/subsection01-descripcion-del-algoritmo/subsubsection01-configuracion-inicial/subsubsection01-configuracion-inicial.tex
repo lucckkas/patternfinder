@@ -1,0 +1,19 @@
+\subsubsection{Configuración Inicial}
+
+
+En esta sección, se establecen los parámetros iniciales y se preparan las estructuras de datos necesarias para el análisis.
+
+\begin{algorithm}[H]
+\caption{Proceso de análisis de interacción proteína-ligando}
+\begin{algorithmic}[1]
+\State Establecer el umbral de distancia para considerar una interacción (\texttt{distance\_threshold})
+\State Leer el archivo PDB para obtener la estructura de la proteína
+\State Inicializar listas para residuos de ligando (\texttt{ligand\_residues}), átomos de proteína (\texttt{protein\_atoms}) y lista de residuos (\texttt{residues\_list})
+\end{algorithmic}
+\end{algorithm}
+
+
+\paragraph{Ejemplo:}
+
+Para la proteína \texttt{1znf}, se establece un umbral de distancia de 4.0 \AA. Se lee el archivo \texttt{1znf.pdb} y se inicializan las listas vacías para almacenar los residuos de ligando, átomos de proteína y lista de residuos.
+
