@@ -262,7 +262,7 @@ Script de benchmark que compara el rendimiento de los modos secuencial y paralel
 #### Qué hace:
 
 1. Ejecuta BatchCompare en modo secuencial
-2. Ejecuta BatchCompare en modo paralelo con 2, 4, 8 workers
+2. Ejecuta BatchCompare en modo paralelo con 2, 4, 8 y 12 workers
 3. Mide tiempos de ejecución
 4. Calcula speedup
 5. Genera CSVs de estadísticas
@@ -285,11 +285,21 @@ Ejecutando... ✓ Completado en 4523ms
 === MODO PARALELO (2 workers) ===
 Ejecutando... ✓ Completado en 2410ms
 
+=== MODO PARALELO (4 workers) ===
+Ejecutando... ✓ Completado en 1305ms
+
+=== MODO PARALELO (8 workers) ===
+Ejecutando... ✓ Completado en 892ms
+
+=== MODO PARALELO (12 workers) ===
+Ejecutando... ✓ Completado en 765ms
+
 === ANÁLISIS DE RESULTADOS ===
 Secuencial          4523ms
 Paralelo (2w)       2410ms  Speedup: 1.88x
 Paralelo (4w)       1305ms  Speedup: 3.47x
 Paralelo (8w)        892ms  Speedup: 5.07x
+Paralelo (12w)       765ms  Speedup: 5.91x
 ```
 
 ---
