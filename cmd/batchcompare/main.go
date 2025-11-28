@@ -27,9 +27,17 @@ func main() {
 
 	if *inputFile == "" {
 		fmt.Fprintf(os.Stderr, "Uso: %s -f <archivo_secuencias> [-p <path_patternfinder>] [-dp] [-seq] [-w <workers>] [-o <archivo_salida>] [-csv <archivo_csv>]\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "\nEl archivo de secuencias debe contener una secuencia por línea.\n")
-		fmt.Fprintf(os.Stderr, "Por defecto usa 4 workers para ejecutar comparaciones en paralelo.\n")
-		fmt.Fprintf(os.Stderr, "Use -csv para generar un archivo CSV con estadísticas de patrones.\n")
+		fmt.Fprintf(os.Stderr, "\nOpciones:\n")
+		fmt.Fprintf(os.Stderr, "  -f <archivo>     Archivo de secuencias (una por línea) [REQUERIDO]\n")
+		fmt.Fprintf(os.Stderr, "  -p <path>        Ruta al ejecutable de patternfinder (default: ./build/patternfinder)\n")
+		fmt.Fprintf(os.Stderr, "  -seq             Modo SECUENCIAL: ejecuta comparaciones una por una y pasa -seq a patternfinder\n")
+		fmt.Fprintf(os.Stderr, "  -w <número>      Número de workers para modo PARALELO (default: 6, ignorado si -seq)\n")
+		fmt.Fprintf(os.Stderr, "  -dp              Pasar flag -dp a patternfinder (muestra matriz LCS)\n")
+		fmt.Fprintf(os.Stderr, "  -o <archivo>     Archivo de salida para resultados (default: stdout)\n")
+		fmt.Fprintf(os.Stderr, "  -csv <archivo>   Genera CSV con estadísticas de patrones\n")
+		fmt.Fprintf(os.Stderr, "\nModos de ejecución:\n")
+		fmt.Fprintf(os.Stderr, "  PARALELO (default): Usa múltiples workers para acelerar las comparaciones\n")
+		fmt.Fprintf(os.Stderr, "  SECUENCIAL (-seq): Ejecuta comparaciones una a la vez (útil para debugging)\n")
 		os.Exit(2)
 	}
 
@@ -47,7 +55,11 @@ func main() {
 
 	fmt.Printf("Leyendo %d secuencias del archivo %s\n", len(sequences), *inputFile)
 	fmt.Printf("Total de comparaciones: %d\n", (len(sequences)*(len(sequences)-1))/2)
-	fmt.Printf("Ejecutando con %d workers en paralelo\n\n", *workers)
+	if *seq {
+		fmt.Printf("Ejecutando en modo SECUENCIAL\n\n")
+	} else {
+		fmt.Printf("Ejecutando con %d workers en paralelo\n\n", *workers)
+	}
 
 	// Configurar salida
 	var output *os.File
@@ -76,24 +88,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Estructura para almacenar los resultados de cada comparación
-	type ComparisonResult struct {
-		Index  int
-		SeqI   int
-		SeqJ   int
-		Output string
-		Error  error
-	}
-
 	// Crear lista de trabajos (pares de secuencias a comparar)
-	type Job struct {
-		Index int
-		SeqI  int
-		SeqJ  int
-		Seq1  string
-		Seq2  string
-	}
-
 	var jobs []Job
 	comparisonCount := 0
 	for i := 0; i < len(sequences); i++ {
@@ -109,6 +104,108 @@ func main() {
 		}
 	}
 
+	// Mapa para recolectar estadísticas de patrones
+	patternStats := make(map[string]*PatternStat)
+
+	var resultMap map[int]ComparisonResult
+
+	// Decidir entre ejecución secuencial o paralela
+	if *seq {
+		// Modo SECUENCIAL
+		resultMap = executeSequential(jobs, absPath, *showDP, *seq)
+	} else {
+		// Modo PARALELO
+		resultMap = executeParallel(jobs, absPath, *showDP, *seq, *workers)
+	}
+
+	// Escribir resultados en orden y recolectar patrones
+	for i := 1; i <= len(jobs); i++ {
+		result := resultMap[i]
+		fmt.Fprintf(output, "========================================\n")
+		fmt.Fprintf(output, "Comparación %d: Secuencia %d vs Secuencia %d\n", result.Index, result.SeqI, result.SeqJ)
+		fmt.Fprintf(output, "========================================\n")
+
+		if result.Error != nil {
+			fmt.Fprintf(output, "Error al ejecutar patternfinder: %v\n", result.Error)
+			fmt.Fprintf(output, "Salida: %s\n", result.Output)
+		} else {
+			fmt.Fprintf(output, "%s", result.Output)
+			// Extraer patrones de la salida
+			extractPatterns(result.Output, patternStats, result.SeqI, result.SeqJ)
+		}
+
+		fmt.Fprintf(output, "\n")
+	}
+
+	fmt.Printf("\nComparaciones completadas: %d\n", comparisonCount)
+	if *outputFile != "" {
+		fmt.Printf("Resultados guardados en: %s\n", *outputFile)
+	}
+
+	// Generar CSV si se especificó
+	if *csvFile != "" {
+		err := generateCSV(*csvFile, patternStats, len(sequences))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error al generar CSV: %v\n", err)
+		} else {
+			fmt.Printf("Estadísticas de patrones guardadas en: %s\n", *csvFile)
+		}
+	}
+}
+
+// Job representa un trabajo de comparación entre dos secuencias
+type Job struct {
+	Index int
+	SeqI  int
+	SeqJ  int
+	Seq1  string
+	Seq2  string
+}
+
+// ComparisonResult almacena el resultado de una comparación
+type ComparisonResult struct {
+	Index  int
+	SeqI   int
+	SeqJ   int
+	Output string
+	Error  error
+}
+
+// executeSequential ejecuta las comparaciones de forma secuencial
+func executeSequential(jobs []Job, absPath string, showDP, useSeq bool) map[int]ComparisonResult {
+	resultMap := make(map[int]ComparisonResult)
+
+	for _, job := range jobs {
+		// Preparar los argumentos para patternfinder
+		args := []string{}
+		if showDP {
+			args = append(args, "-dp")
+		}
+		// if useSeq {
+		args = append(args, "-seq")
+		// }
+		args = append(args, job.Seq1, job.Seq2)
+
+		// Ejecutar patternfinder
+		cmd := exec.Command(absPath, args...)
+		cmdOutput, err := cmd.CombinedOutput()
+
+		result := ComparisonResult{
+			Index:  job.Index,
+			SeqI:   job.SeqI,
+			SeqJ:   job.SeqJ,
+			Output: string(cmdOutput),
+			Error:  err,
+		}
+
+		resultMap[job.Index] = result
+	}
+
+	return resultMap
+}
+
+// executeParallel ejecuta las comparaciones en paralelo con múltiples workers
+func executeParallel(jobs []Job, absPath string, showDP, useSeq bool, workers int) map[int]ComparisonResult {
 	// Canal para enviar trabajos
 	jobsChan := make(chan Job, len(jobs))
 	// Canal para recibir resultados
@@ -116,19 +213,19 @@ func main() {
 
 	// Lanzar workers
 	var wg sync.WaitGroup
-	for w := 0; w < *workers; w++ {
+	for w := 0; w < workers; w++ {
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
 			for job := range jobsChan {
 				// Preparar los argumentos para patternfinder
 				args := []string{}
-				if *showDP {
+				if showDP {
 					args = append(args, "-dp")
 				}
-				if *seq {
-					args = append(args, "-seq")
-				}
+				// if useSeq {
+				args = append(args, "-seq")
+				// }
 				args = append(args, job.Seq1, job.Seq2)
 
 				// Ejecutar patternfinder
@@ -166,48 +263,12 @@ func main() {
 	}
 
 	// Ordenar resultados por índice para mantener el orden original
-	// Usamos un mapa para acceso rápido por índice
 	resultMap := make(map[int]ComparisonResult)
 	for _, r := range results {
 		resultMap[r.Index] = r
 	}
 
-	// Mapa para recolectar estadísticas de patrones
-	patternStats := make(map[string]*PatternStat)
-
-	// Escribir resultados en orden y recolectar patrones
-	for i := 1; i <= len(jobs); i++ {
-		result := resultMap[i]
-		fmt.Fprintf(output, "========================================\n")
-		fmt.Fprintf(output, "Comparación %d: Secuencia %d vs Secuencia %d\n", result.Index, result.SeqI, result.SeqJ)
-		fmt.Fprintf(output, "========================================\n")
-
-		if result.Error != nil {
-			fmt.Fprintf(output, "Error al ejecutar patternfinder: %v\n", result.Error)
-			fmt.Fprintf(output, "Salida: %s\n", result.Output)
-		} else {
-			fmt.Fprintf(output, "%s", result.Output)
-			// Extraer patrones de la salida
-			extractPatterns(result.Output, patternStats, result.SeqI, result.SeqJ)
-		}
-
-		fmt.Fprintf(output, "\n")
-	}
-
-	fmt.Printf("\nComparaciones completadas: %d\n", comparisonCount)
-	if *outputFile != "" {
-		fmt.Printf("Resultados guardados en: %s\n", *outputFile)
-	}
-
-	// Generar CSV si se especificó
-	if *csvFile != "" {
-		err := generateCSV(*csvFile, patternStats, len(sequences))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error al generar CSV: %v\n", err)
-		} else {
-			fmt.Printf("Estadísticas de patrones guardadas en: %s\n", *csvFile)
-		}
-	}
+	return resultMap
 }
 
 // readSequences lee un archivo de texto y retorna un slice con las secuencias

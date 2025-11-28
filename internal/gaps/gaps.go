@@ -132,6 +132,7 @@ func MinGapsDistanceTotalViable(seq string, pattern string) ([]int, bool) {
 // el conjunto de TODOS los valores posibles de b-a-1 por cada par consecutivo,
 // considerando SOLO incrustaciones viables (bandas earliest/latest).
 // Retorna un slice de sets (map[int]struct{}) de longitud len(pattern)-1.
+// Optimizado para usar menos memoria: procesa gaps incrementalmente sin almacenar rutas completas.
 func AllGapValuesDistanceTotalViable(seq string, pattern string) ([]map[int]struct{}, bool) {
 	L := len(pattern)
 	if L <= 1 {
@@ -161,8 +162,6 @@ func AllGapValuesDistanceTotalViable(seq string, pattern string) ([]map[int]stru
 		sets[i] = make(map[int]struct{})
 	}
 
-	path := make([]int, L) // índices elegidos para cada letra del patrón
-
 	// Búsqueda binaria para encontrar el primer elemento > minVal
 	findStart := func(arr []int, minVal int) int {
 		left, right := 0, len(arr)
@@ -177,25 +176,22 @@ func AllGapValuesDistanceTotalViable(seq string, pattern string) ([]map[int]stru
 		return left
 	}
 
-	var dfs func(k int, prev int) bool
-	dfs = func(k int, prev int) bool {
-		// k: posición en el patrón a elegir
-		// prev: índice elegido del carácter anterior en seq (o -1 si k==0)
-		if k == L { // tenemos una incrustación completa
-			// acumular gaps de toda la ruta
-			for i := 0; i+1 < L; i++ {
-				a, b := path[i], path[i+1]
-				sets[i][b-a-1] = struct{}{}
-			}
+	// DFS optimizado: registra gaps inmediatamente, sin almacenar toda la ruta
+	var dfs func(k int, prevPos int) bool
+	dfs = func(k int, prevPos int) bool {
+		// k: posición actual en el patrón
+		// prevPos: posición en seq del carácter anterior (o -1 si k==0)
+		
+		if k == L { // Llegamos al final de una incrustación válida
 			return true
 		}
 
 		v := occ[k]
 		
-		// Búsqueda binaria para encontrar primer v[i] > prev
+		// Búsqueda binaria para encontrar primer v[i] > prevPos
 		i0 := 0
-		if prev >= 0 {
-			i0 = findStart(v, prev)
+		if prevPos >= 0 {
+			i0 = findStart(v, prevPos)
 		}
 		
 		// Poda: si no hay ocurrencias válidas, retornar false
@@ -203,17 +199,34 @@ func AllGapValuesDistanceTotalViable(seq string, pattern string) ([]map[int]stru
 			return false
 		}
 		
+		// Poda temprana: verificar que podemos alcanzar el último carácter
+		if k+1 < L && v[len(v)-1] >= lat[k+1] {
+			// Encontrar la última posición válida
+			lastValid := len(v) - 1
+			for lastValid >= i0 && v[lastValid] >= lat[k+1] {
+				lastValid--
+			}
+			if lastValid < i0 {
+				return false
+			}
+		}
+		
 		okAny := false
 		for i := i0; i < len(v); i++ {
 			currentPos := v[i]
-			path[k] = currentPos
 			
-			// Poda adicional: si la posición actual ya supera o iguala latest del siguiente carácter,
-			// las siguientes posiciones tampoco servirán
+			// Poda: si la posición actual ya supera o iguala latest del siguiente carácter
 			if k+1 < L && currentPos >= lat[k+1] {
 				break
 			}
 			
+			// Si no es el primer carácter, registrar el gap inmediatamente
+			if k > 0 {
+				gap := currentPos - prevPos - 1
+				sets[k-1][gap] = struct{}{}
+			}
+			
+			// Continuar DFS
 			if dfs(k+1, currentPos) {
 				okAny = true
 			}
