@@ -1,120 +1,10 @@
 {
-    "6b0o": {
-        "ZN_A_501": [
-            "CdfkdCerrfsrsdqlkrHqrrH"
-        ],
-        "ZN_A_502": [
-            "CktCqrkfsrsdhlktHtrtH"
-        ],
-        "ZN_A_503": [
-            "CrWpsCqkkfarsdelvrHhnmH"
-        ],
-        "ZN_A_504": [
-            "CaypgCnkryfklshlqmHsrkH"
-        ],
-        "EDO_A_505": [
-            "RsDQlkR"
-        ],
-        "EDO_A_506": [
-            "GVKpfqcktcqrK"
-        ],
-        "ZN_D_501": [
-            "CdfkdCerrfsrsdqlkrHqrrH"
-        ],
-        "ZN_D_502": [
-            "CktCqrkfsrsdhlktHtrtH"
-        ],
-        "ZN_D_503": [
-            "CrwpsCqkkfarsdelvrHhnmH"
-        ],
-        "ZN_D_504": [
-            "CaypgCnkryfklshlqmHsrkH"
-        ]
-    },
-    "1tf3": {
-        "ZN_A_102": [
-            "CsFadCgAaynknwklqaHlskH"
-        ],
-        "ZN_A_2": [
-            "CkEegCeKgftslhhltrHsltH"
-        ],
-        "ZN_A_3": [
-            "CdSdgCdlrfttkanmkkHFnrfH"
-        ]
-    },
-    "3cln": {
-        "CA_A_149": [
-            "DkDgDgTittkE"
-        ],
-        "CA_A_150": [
-            "DaDgNgTidfpE"
-        ],
-        "CA_A_151": [
-            "DkDgNgYisaaE"
-        ],
-        "CA_A_152": [
-            "NiDgDgQvnyeE"
-        ]
-    },
-    "1cll": {
-        "CA_A_149": [
-            "DkDgDgTittkE"
-        ],
-        "CA_A_150": [
-            "DaDgNgTidfpE"
-        ],
-        "CA_A_151": [
-            "DkDgNgYisaaE"
-        ],
-        "CA_A_152": [
-            "DiDgDgQvnyeE"
-        ],
-        "EOH_A_153": [
-            "M"
-        ]
-    },
-    "1WG2": {
-        "ZN_A_200": [
-            "CfSCnKkvgvmgfkckcgstfCgSH"
-        ],
-        "ZN_A_400": [
-            "CkCgstFcgshryPekHeC"
-        ]
-    },
-    "1WFP": {
-        "ZN_A_201": [
-            "ClSCnkkvgvtgfkcrcgstfCgTH"
-        ],
-        "ZN_A_401": [
-            "CrCgstFcgthrypesHeC"
-        ]
-    },
-    "1A1F": {
-        "ZN_A_201": [
-            "CpvesCdrrfsdssnltrHiriH"
-        ],
-        "ZN_A_202": [
-            "CriCmrnfsrsdhlttHirtH"
-        ],
-        "ZN_A_203": [
-            "CdiCgrkfarsderkrHtkiH"
-        ]
-    },
-    "1A1G": {
-        "ZN_A_201": [
-            "CpvesCdrrfsdssnltrHiriH"
-        ],
-        "ZN_A_202": [
-            "CriCmrnfsrsdhlttHirtH"
-        ],
-        "ZN_A_203": [
-            "CdiCgrkfarsderkrHtkiH"
-        ],
+    "1a1f": {
         "DA_B_1": [
-            "R"
+            "RkfarsderkR"
         ],
         "DG_B_2": [
-            "R"
+            "ErkR"
         ],
         "DC_B_3": [
             "ThtgekpfacdicgrkfaRsdErkR"
@@ -129,50 +19,142 @@
             "IhtgqkpfqcricmrnfSRsdH"
         ],
         "DG_B_7": [
-            "RrFsdssnltRHirihtgqkpfqcricmrnfsR"
+            "RrFsdssnltRHirIhtgqkpfqcricmrnfsR"
         ],
         "DG_B_8": [
-            "RpyacpvescdRrFsdssnltR"
+            "RpyacpvescdrrFsdssNltR"
         ],
-        "DC_B_9": [
-            "NltR"
+        "DA_B_9": [
+            "SdssNltR"
         ],
-        "DG_B_10": [],
-        "DT_B_11": [],
+        "DC_B_10": [
+            "D"
+        ],
+        "DC_B_11": [],
         "DT_C_51": [
-            "SSnlT"
+            "SS"
         ],
-        "DA_C_52": [
+        "DG_C_52": [
             "S"
         ],
-        "DC_C_53": [
-            "F"
+        "DG_C_53": [
+            "SnltrhirihtgqkpFqcricmrnfsrS"
         ],
-        "DG_C_54": [
-            "R"
+        "DT_C_54": [
+            "RhirihtgqkpfqcricmrnfsrSD"
         ],
         "DC_C_55": [
             "RsD"
         ],
-        "DC_C_56": [
-            "DhltthirthtgekpfacdicgrkfarS"
-        ],
+        "DC_C_56": [],
         "DC_C_57": [
-            "K"
+            "D"
         ],
         "DA_C_58": [
-            "RsD"
+            "RsDerK"
         ],
         "DC_C_59": [],
         "DG_C_60": [],
-        "DC_C_61": []
-    },
-    "2COT": {
+        "DC_C_61": [],
         "ZN_A_201": [
-            "CdECGksfshssdlskHrrtH"
+            "CpvesCdrrfsdssnltrHiriH"
         ],
-        "ZN_A_401": [
-            "CdECGkafiqrshligHhrVH"
+        "ZN_A_202": [
+            "CriCmrnfsrsdhlttHirtH"
+        ],
+        "ZN_A_203": [
+            "CdiCgrkfarsderkrHtkiH"
+        ]
+    },
+    "1tf3": {
+        "DT_E_1": [
+            "R"
+        ],
+        "DT_E_2": [
+            "HfnRF"
+        ],
+        "DG_E_3": [
+            "LrFttkaNmkKHfnRF"
+        ],
+        "DG_E_4": [
+            "ThtgeKnftcdsdgcdlRFTtkaNmkK"
+        ],
+        "DA_E_5": [
+            "KgftslhhltrHslThtgeknftcdsdgcdlrfTTkaNmkK"
+        ],
+        "DT_E_6": [
+            "KgFtslhhltRHslthtgeknftcdsdgcdlrftT"
+        ],
+        "DG_E_7": [
+            "AhlskhtgeKpfpckeegcekGFTslhhltR"
+        ],
+        "DG_E_8": [
+            "KlqAhlSKhtgekpfpckeegcekgfTslhHltR"
+        ],
+        "DG_E_9": [
+            "YnknWKlqahlsKhtgekpfpckeegcekgftslhH"
+        ],
+        "DA_E_10": [
+            "YnknWK"
+        ],
+        "DG_E_11": [
+            "KnW"
+        ],
+        "DA_E_12": [
+            "K"
+        ],
+        "DC_E_13": [
+            "K"
+        ],
+        "DC_E_14": [],
+        "DG_E_15": [],
+        "DC_F_16": [
+            "MKryicsfadcgaayN"
+        ],
+        "DG_F_17": [
+            "KrYicsfadcgaayNKN"
+        ],
+        "DG_F_18": [
+            "YicsfadcgaaynKNW"
+        ],
+        "DT_F_19": [
+            "KnWklqahlskhtgekpfpckeegcekgftsLH"
+        ],
+        "DC_F_20": [
+            "WklqahlskhtgekpfpckeegcekgftsLH"
+        ],
+        "DT_F_21": [
+            "HhltrhslthtgeknftcdsdgcdlrfttK"
+        ],
+        "DC_F_22": [
+            "HHltRhslthtgeknftcdsdgcdlrfttK"
+        ],
+        "DC_F_23": [
+            "HltRhslthtgeknftcdsdgcdlrfttKAnmK"
+        ],
+        "DC_F_24": [
+            "RhslthtgeknftcdsdgcdlrfttkAnmK"
+        ],
+        "DA_F_25": [
+            "AnmkK"
+        ],
+        "DT_F_26": [
+            "K"
+        ],
+        "DC_F_27": [
+            "K"
+        ],
+        "DC_F_28": [],
+        "DA_F_29": [],
+        "DA_F_30": [],
+        "ZN_A_102": [
+            "CsFadCgAaynknwklqaHlskH"
+        ],
+        "ZN_A_2": [
+            "CkEegCeKgftslhhltrHsltH"
+        ],
+        "ZN_A_3": [
+            "CdSdgCdlrfttkanmkkHFnrfH"
         ]
     }
 }

@@ -1,6 +1,6 @@
 \section{Paralelización de la construcción de la matriz}
 
-La función \texttt{DPTableParallel} paraleliza el llenado de la matriz procesando las diagonales (de arriba-derecha a abajo-izquierda) de forma secuencial, pero calculando todas las celdas de cada diagonal en paralelo. Las celdas en una misma diagonal tienen la propiedad de que sus índices $(i, j)$ suman un valor constante. La estrategia es la siguiente:
+El algorimo paraleliza el llenado de la matriz procesando las diagonales (de arriba-derecha a abajo-izquierda) de forma secuencial, pero calculando todas las celdas de cada diagonal en paralelo. Las celdas en una misma diagonal tienen la propiedad de que sus índices $(i, j)$ suman un valor constante. La estrategia es la siguiente:
 
 \begin{verbatim}
 Para cada diagonal de la matriz:

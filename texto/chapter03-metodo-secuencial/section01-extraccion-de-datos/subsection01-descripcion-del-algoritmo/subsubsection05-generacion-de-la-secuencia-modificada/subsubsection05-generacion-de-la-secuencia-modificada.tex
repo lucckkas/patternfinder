@@ -3,22 +3,20 @@
 
 Se genera la secuencia completa de aminoácidos de la proteína, utilizando letras mayúsculas para los aminoácidos que interactúan con el ligando y minúsculas para los que no.
 
-\begin{algorithm}[H]
-\caption{Generación de secuencia resaltada de residuos}
-\begin{algorithmic}[1]
-\State Inicializar la secuencia resaltada (\texttt{highlighted\_sequence})
-\ForAll{residuo en \texttt{residues\_list}}
-    \State Obtener el nombre del residuo (\texttt{resname})
-    \State Convertir \texttt{resname} a código de una letra (\texttt{one\_letter})
-    \If{el residuo está en \texttt{interacting\_residues}}
-        \State Convertir \texttt{one\_letter} a mayúscula
-    \Else
-        \State Convertir \texttt{one\_letter} a minúscula
-    \EndIf
-    \State Añadir \texttt{one\_letter} a \texttt{highlighted\_sequence}
-\EndFor
-\end{algorithmic}
-\end{algorithm}
+\begin{verbatim}
+Inicializar la secuencia resaltada (highlighted_sequence)
+
+Para cada residuo en residues_list:
+    Obtener el nombre del residuo (resname)
+    Convertir resname a código de una letra (one_letter)
+    
+    Si el residuo está en interacting_residues:
+        Convertir one_letter a mayúscula
+    Sino:
+        Convertir one_letter a minúscula
+    
+    Añadir one_letter a highlighted_sequence
+\end{verbatim}
 
 
 \paragraph{Ejemplo: Generación de la Secuencia Modificada}

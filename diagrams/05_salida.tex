@@ -1,0 +1,87 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows}
+
+\begin{document}
+
+\begin{tikzpicture}[
+        node distance=1.5cm,
+        % Estilos para nodos principales
+        mainbox/.style={
+                rectangle,
+                rounded corners=10pt,
+                minimum width=7cm,
+                minimum height=1.5cm,
+                text centered,
+                text width=6.5cm,
+                font=\bfseries\Large,
+                text=white,
+                drop shadow
+            },
+        % Estilo para archivo CSV
+        csvfile/.style={
+                rectangle,
+                rounded corners=5pt,
+                minimum width=12cm,
+                minimum height=3.5cm,
+                text centered,
+                font=\ttfamily\normalsize,
+                text=black,
+                fill=gray!10,
+                draw=teal!80!black,
+                line width=2pt,
+                align=left
+            },
+        % Flechas
+        arrow/.style={
+                ->,
+                >=Stealth,
+                line width=2pt,
+                color=teal!80!black
+            },
+        % Grupo contenedor
+        groupbox/.style={
+                rectangle,
+                rounded corners=15pt,
+                draw=teal!80!black,
+                line width=3pt,
+                fill=teal!80!black!8,
+                inner sep=25pt
+            }
+    ]
+
+    % Título principal
+    \node[mainbox, fill=teal!80!black] (traduccion) {Generación de CSV\\con Patrones PROSITE};
+
+    % CSV
+    \node[csvfile, below=2cm of traduccion] (csv) {
+        \begin{tabular}{l}
+            \textbf{\large res.csv}\\[8pt]
+            \textbf{Patrón, Cantidad Mayúsculas, Cantidad Secuencias, Porcentaje}\\[4pt]
+            C-x(2)-C-x(16)-H, 3, 6, 100.00\%\\
+            C-x(4)-C-x(16)-H, 3, 5, 83.33\%\\
+            C-x(17)-C-x(2)-H, 3, 6, 100.00\%\\
+            C-x(4)-C-x(12)-H-x(3)-H, 4, 4, 66.67\%\\
+            ...
+        \end{tabular}
+    };
+
+    % Grupo salida
+    \begin{scope}[on background layer]
+        \node[groupbox, fit=(traduccion)(csv), label={[font=\bfseries\huge, text=teal!80!black]below:SALIDA}] (salida) {};
+    \end{scope}
+
+    % Flecha
+    \draw[arrow] (traduccion.south) -- (csv.north);
+
+    % Descripción
+    \node[above=1.5cm of traduccion, text width=12cm, align=center, font=\large] {
+        Archivo CSV con todos los patrones encontrados,\\
+        sus estadísticas y formato compatible con PROSITE
+    };
+
+\end{tikzpicture}
+
+\end{document}

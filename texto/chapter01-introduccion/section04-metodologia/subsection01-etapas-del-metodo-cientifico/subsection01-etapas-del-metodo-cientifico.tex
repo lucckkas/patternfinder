@@ -1,14 +1,14 @@
 \subsection{Etapas del Método Científico}
 
-El proyecto se desarrollará siguiendo las etapas clásicas del método científico, asegurando un enfoque sistemático y objetivo:
+El proyecto se desarrolló siguiendo las etapas clásicas del método científico, asegurando un enfoque sistemático y objetivo:
 
-\paragraph{Observación} Se inicia con la revisión y análisis del algoritmo secuencial existente, identificando el problema central: la explosión combinatoria que limita su eficiencia. Esta etapa implica recopilar datos y entender a fondo el comportamiento actual del algoritmo.
+\paragraph{Observación} Se inició con la revisión y análisis del algoritmo secuencial existente, identificando el problema central: la explosión combinatoria que limitaba su eficiencia. Esta etapa implicó recopilar datos y entender a fondo el comportamiento del algoritmo base.
 
-\paragraph{Formulación de hipótesis} Basándose en la observación, se planteará la hipótesis de que la paralelización mediante hilos mejorará significativamente el tiempo de ejecución del algoritmo sin comprometer la calidad de los resultados.
+\paragraph{Formulación de hipótesis} Basándose en la observación, se planteó la hipótesis de que la paralelización mediante hilos mejoraría significativamente el tiempo de ejecución del algoritmo sin comprometer la calidad de los resultados.
 
-\paragraph{Experimentación} Se implementará la versión paralelizada del algoritmo y se llevarán a cabo experimentos para poner a prueba la hipótesis. Esta etapa incluirá la ejecución del algoritmo bajo diferentes configuraciones, variando el número de hilos y analizando cómo se distribuye la carga de trabajo.
+\paragraph{Experimentación} Se implementó la versión paralelizada del algoritmo y se llevaron a cabo experimentos para poner a prueba la hipótesis. Esta etapa incluyó la ejecución del algoritmo bajo diferentes configuraciones, variando el número de hilos y analizando cómo se distribuyó la carga de trabajo.
 
-\paragraph{Análisis de resultados} Los datos obtenidos durante la experimentación se anali-zarán para verificar si la paralelización cumple con las expectativas de mejora de rendimiento. Se compararán los tiempos de ejecución y el uso de recursos entre la versión secuencial y la paralela.
+\paragraph{Análisis de resultados} Los datos obtenidos durante la experimentación se analizaron para verificar si la paralelización cumplió con las expectativas de mejora de rendimiento. Se compararon los tiempos de ejecución y el uso de recursos entre la versión secuencial y la paralela.
 
-\paragraph{Conclusiones} Basándose en el análisis de los resultados, se extraerán conclusiones sobre la efectividad de la paralelización. Si los resultados son positivos, se documentará el éxito del enfoque; en caso contrario, se propondrán nuevas iteraciones o ajustes.
+\paragraph{Conclusiones} Basándose en el análisis de los resultados, se extrajeron conclusiones sobre la efectividad de la paralelización. Los resultados revelaron que, aunque técnicamente correcta, la paralelización interna del algoritmo LCS no proporcionó mejoras de rendimiento, mientras que la paralelización a nivel de procesamiento de múltiples pares de secuencias sí resultó altamente efectiva.
 
