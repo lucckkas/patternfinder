@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, shadows}
+\input{colors.tex}
 
 \begin{document}
 
@@ -30,16 +31,16 @@
     ]
 
     % ENTRADA (arriba)
-    \node[mainbox, fill=blue!70!black] (entrada) {Estructuras\\mmCIF\\(.cif)};
+    \node[mainbox, fill=FormalBlue] (entrada) {Estructuras\\mmCIF\\(.cif)};
 
     % EXTRACCIÓN (abajo-derecha)
-    \node[mainbox, fill=orange!80!black, below right=1cm and 0.1cm of entrada] (extraccion) {Extracción de\\Segmentos};
+    \node[mainbox, fill=FormalOrange, below right=1cm and 0.1cm of entrada] (extraccion) {Extracción de\\Segmentos};
 
     % COMPARACIÓN (arriba-derecha)
-    \node[mainbox, fill=green!60!black, above right=1cm and 0.1cm of extraccion] (comparacion) {Comparación\\mediante\\LCS};
+    \node[mainbox, fill=FormalGreen, above right=1cm and 0.1cm of extraccion] (comparacion) {Comparación\\mediante\\LCS};
 
     % RECONSTRUCCIÓN (abajo-derecha)
-    \node[mainbox, fill=red!70!black, below right=1cm and 0.1cm of comparacion] (reconstruccion) {Reconstrucción\\de Patrones};
+    \node[mainbox, fill=FormalRed, below right=1cm and 0.1cm of comparacion] (reconstruccion) {Generación\\de Patrones};
 
     % SALIDA (arriba-derecha)
     \node[mainbox, fill=teal!80!black, above right=1cm and 0.1cm of reconstruccion] (salida) {Generación\\CSV\\PROSITE};

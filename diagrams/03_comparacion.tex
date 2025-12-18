@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows}
+\input{colors.tex}
 
 \begin{document}
 
@@ -31,7 +32,7 @@
                 font=\normalsize,
                 text=black,
                 fill=white,
-                draw=green!60!black,
+                draw=FormalGreen,
                 line width=1.5pt
             },
         % Flechas
@@ -39,21 +40,21 @@
                 ->,
                 >=Stealth,
                 line width=2pt,
-                color=green!60!black
+            color=FormalGreen
             },
         % Grupo contenedor
         groupbox/.style={
                 rectangle,
                 rounded corners=15pt,
-                draw=green!60!black,
+            draw=FormalGreen,
                 line width=3pt,
-                fill=green!60!black!8,
+            fill=FormalGreen!8,
                 inner sep=25pt
             }
     ]
 
     % Título principal
-    \node[mainbox, fill=green!60!black] (comparacion) {Comparación mediante LCS};
+    \node[mainbox, fill=FormalGreen] (comparacion) {Comparación mediante LCS};
 
     % Sub-nodos
     \node[subbox, below=2cm of comparacion, xshift=-6cm] (comp1) {

@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows}
+\input{colors.tex}
 
 \begin{document}
 
@@ -31,7 +32,7 @@
                 font=\normalsize,
                 text=black,
                 fill=white,
-                draw=red!70!black,
+                draw=FormalRed,
                 line width=1.5pt
             },
         % Flechas
@@ -39,21 +40,21 @@
                 ->,
                 >=Stealth,
                 line width=2pt,
-                color=red!70!black
+            color=FormalRed
             },
         % Grupo contenedor
         groupbox/.style={
                 rectangle,
                 rounded corners=15pt,
-                draw=red!70!black,
+            draw=FormalRed,
                 line width=3pt,
-                fill=red!70!black!8,
+            fill=FormalRed!8,
                 inner sep=25pt
             }
     ]
 
     % Título principal
-    \node[mainbox, fill=red!70!black] (reconstruccion) {Reconstrucción de Patrones};
+    \node[mainbox, fill=FormalRed] (reconstruccion) {Generación de Patrones};
 
     % Sub-nodos
     \node[subbox, below=2cm of reconstruccion, xshift=-6cm] (rec1) {

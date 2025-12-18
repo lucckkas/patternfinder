@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows, calc}
+\input{colors.tex}
 
 \begin{document}
 
@@ -30,7 +31,7 @@
             text width=1.1cm,
             font=\scriptsize,
             text=white,
-            fill=purple!70!black,
+            fill=FormalGreen,
             drop shadow
         },
     % Estilo para jobs
@@ -40,10 +41,10 @@
             minimum width=1cm,
             minimum height=0.6cm,
             text centered,
-            font=\tiny,
+            font=\scriptsize,
             text=black,
             fill=yellow!60,
-            draw=orange!80!black,
+            draw=FormalOrange,
             line width=0.8pt
         },
     % Canales
@@ -53,7 +54,7 @@
             minimum width=1.2cm,
             minimum height=2.5cm,
             text centered,
-            font=\tiny\ttfamily,
+            font=\scriptsize,
             text=white,
             fill=gray!60!black,
             drop shadow
@@ -69,7 +70,7 @@
     thickarrow/.style={
     -{Stealth[length=8pt,width=11pt]},
     line width=2pt,
-    color=blue!60,
+    color=FormalBlue!60,
     shorten <=3pt,
     shorten >=3pt
     },
@@ -85,10 +86,10 @@
     ]
 
     % ========== GENERACIÓN DE JOBS ==========
-    \node[mainbox, fill=orange!80!black] (genjobs) {Generar\\pares $(i,j)$};
+    \node[mainbox, fill=FormalOrange] (genjobs) {Generar\\pares $(i,j)$};
 
     % ========== ENTRADA (arriba de genjobs) ==========
-    \node[mainbox, fill=blue!70!black, above=0.6cm of genjobs] (secuencias) {Secuencias\\de entrada};
+    \node[mainbox, fill=FormalBlue, above=0.6cm of genjobs] (secuencias) {Secuencias\\de entrada};
 
     % Jobs individuales (verticales)
     \node[job, right=1.2cm of genjobs, yshift=1cm] (job1) {Job 1};
@@ -98,7 +99,7 @@
     \node[job, below=0.1cm of dots] (jobn) {Job N};
 
     % ========== CANAL DE JOBS (vertical) ==========
-    \node[channel, right=0.8cm of job2] (jobchan) {jobs\\Chan};
+    \node[channel, right=0.8cm of job2] (jobchan) {jobs};
 
     % ========== WORKERS (verticales) ==========
     \node[worker, right=0.8cm of jobchan, yshift=1.2cm] (w1) {\textbf{W1}};
@@ -109,14 +110,14 @@
 
     % Grupo de workers
     \begin{scope}[on background layer]
-        \node[groupbox=purple!70!black, fit=(w1)(w2)(w3)(wdots)(wn), label={[font=\bfseries\tiny, text=purple!70!black]above:Workers}] (workerpool) {};
+        \node[groupbox=FormalGreen, fit=(w1)(w2)(w3)(wdots)(wn), label={[font=\bfseries\tiny, text=FormalGreen]above:Workers}] (workerpool) {};
     \end{scope}
 
     % ========== CANAL DE RESULTADOS (vertical) ==========
-    \node[channel, right=0.8cm of w2] (resultchan) {result\\Chan};
+    \node[channel, right=0.8cm of w2] (resultchan) {result};
 
     % ========== RECOLECCIÓN ==========
-    \node[mainbox, fill=green!60!black, right=1cm of resultchan] (collect) {Recolectar\\resultados};
+    \node[mainbox, fill=FormalRed, right=1cm of resultchan] (collect) {Generación\\de patrones};
 
     % ========== SALIDA (abajo de collect) ==========
     \node[mainbox, fill=teal!80!black, below=0.6cm of collect] (output) {Salida\\CSV};

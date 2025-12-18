@@ -259,12 +259,12 @@ type patternGroup struct {
 }
 
 // parsePattern extrae la base del patrón (letras mayúsculas) y los valores de gaps
-// Ahora devuelve un slice de gaps donde gaps[i] es el gap DESPUÉS de la letra i
-// Si no hay gap después de una letra, el valor es -1
-// Ejemplo: "C-x(2)-H-C" -> letters="CHC", gaps=[2, -1] (gap después de C, nada después de H)
-func parsePattern(pattern string) (string, []int) {
+// Devuelve un slice de slices donde gapsAfter[i] contiene los valores del gap DESPUÉS de la letra i
+// Maneja tanto x(n) como x(min,max) expandiendo los rangos
+// Ejemplo: "C-x(2,4)-H" -> letters="CH", gaps=[[2,3,4]]
+func parsePattern(pattern string) (string, [][]int) {
 	var letters strings.Builder
-	gapsAfter := []int{} // gap después de cada letra (-1 si no hay)
+	gapsAfter := [][]int{} // gaps después de cada letra (vacío si no hay)
 
 	i := 0
 	for i < len(pattern) {
@@ -274,26 +274,57 @@ func parsePattern(pattern string) (string, []int) {
 		if r >= 'A' && r <= 'Z' {
 			letters.WriteRune(r)
 			// Por defecto, no hay gap después de esta letra
-			gapsAfter = append(gapsAfter, -1)
+			gapsAfter = append(gapsAfter, []int{})
 			i++
 			continue
 		}
 
-		// Si encontramos x(, extraer el número y asociarlo a la última letra
+		// Si encontramos x(, extraer el número o rango
 		if i+2 < len(pattern) && pattern[i] == 'x' && pattern[i+1] == '(' {
 			i += 2 // saltar "x("
+			
+			// Extraer primer número
 			numStart := i
 			for i < len(pattern) && pattern[i] >= '0' && pattern[i] <= '9' {
 				i++
 			}
+			
+			var gapValues []int
 			if numStart < i && len(gapsAfter) > 0 {
-				num := 0
+				num1 := 0
 				for j := numStart; j < i; j++ {
-					num = num*10 + int(pattern[j]-'0')
+					num1 = num1*10 + int(pattern[j]-'0')
 				}
-				// Asignar el gap a la última letra agregada
-				gapsAfter[len(gapsAfter)-1] = num
+				
+				// Verificar si hay un rango (coma o guión)
+				if i < len(pattern) && (pattern[i] == ',' || pattern[i] == '-') {
+					i++ // saltar ',' o '-'
+					numStart = i
+					for i < len(pattern) && pattern[i] >= '0' && pattern[i] <= '9' {
+						i++
+					}
+					if numStart < i {
+						num2 := 0
+						for j := numStart; j < i; j++ {
+							num2 = num2*10 + int(pattern[j]-'0')
+						}
+						// Expandir rango [num1, num2]
+						for v := num1; v <= num2; v++ {
+							if v > 0 { // Ignorar x(0)
+								gapValues = append(gapValues, v)
+							}
+						}
+					}
+				} else if num1 > 0 { // Valor único, ignorar x(0)
+					gapValues = []int{num1}
+				}
+				
+				// Asignar los valores al gap de la última letra
+				if len(gapValues) > 0 {
+					gapsAfter[len(gapsAfter)-1] = gapValues
+				}
 			}
+			
 			// Saltar hasta después del ')'
 			for i < len(pattern) && pattern[i] != ')' {
 				i++
@@ -442,7 +473,7 @@ func ConsolidatePatterns(stats map[string]*PatternStat) map[string]*PatternStat 
 		// Esto asegura que solo se agrupen patrones con la misma estructura
 		gapPositions := ""
 		for i, g := range gaps {
-			if g >= 0 {
+			if len(g) > 0 {
 				gapPositions += itoa(i) + ","
 			}
 		}
@@ -465,21 +496,23 @@ func ConsolidatePatterns(stats map[string]*PatternStat) map[string]*PatternStat 
 		g := groups[key]
 		g.patterns = append(g.patterns, pattern)
 
-		// Agregar valores de gaps (solo si el gap existe, es decir >= 0)
-		for i, gapVal := range gaps {
-			if gapVal < 0 {
+		// Agregar valores de gaps
+		for i, gapVals := range gaps {
+			if len(gapVals) == 0 {
 				continue // No hay gap en esta posición
 			}
-			// Verificar si ya existe
-			found := false
-			for _, v := range g.gapValues[i] {
-				if v == gapVal {
-					found = true
-					break
+			// Agregar cada valor si no existe
+			for _, gapVal := range gapVals {
+				found := false
+				for _, v := range g.gapValues[i] {
+					if v == gapVal {
+						found = true
+						break
+					}
 				}
-			}
-			if !found {
-				g.gapValues[i] = append(g.gapValues[i], gapVal)
+				if !found {
+					g.gapValues[i] = append(g.gapValues[i], gapVal)
+				}
 			}
 		}
 

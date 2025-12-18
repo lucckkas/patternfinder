@@ -1,6 +1,5 @@
 Patrón,Cantidad de Mayúsculas,Cantidad de Secuencias,Porcentaje de Secuencias
-"C-x(2)-C-x(11,12)-H-x(3)-H",4,48,100.00%
-"C-x(2)-C-x(11,12)-H-x(5)-H",4,48,100.00%
-"C-x(4)-C-x(11,12)-H-x(3)-H",4,48,100.00%
-"C-x(4)-C-x(11,12)-H-x(5)-H",4,48,100.00%
-C-x(1)-V-C-x(1)-R-x(10)-H-x(3)-H,6,3,6.25%
+G,1,2,66.67%
+G-x(3)-V,2,2,66.67%
+"H-x(3,4)-S-x(4,5)-G",3,2,66.67%
+"H-x(3,4)-S-x(8)-G",3,2,66.67%

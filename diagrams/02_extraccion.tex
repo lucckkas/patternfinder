@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows}
+\input{colors.tex}
 
 \begin{document}
 
@@ -31,7 +32,7 @@
                 font=\normalsize,
                 text=black,
                 fill=white,
-                draw=orange!80!black,
+                draw=FormalOrange,
                 line width=1.5pt
             },
         % Flechas
@@ -39,21 +40,21 @@
                 ->,
                 >=Stealth,
                 line width=2pt,
-                color=orange!80!black
+            color=FormalOrange
             },
         % Grupo contenedor
         groupbox/.style={
                 rectangle,
                 rounded corners=15pt,
-                draw=orange!80!black,
+            draw=FormalOrange,
                 line width=3pt,
-                fill=orange!80!black!8,
+            fill=FormalOrange!8,
                 inner sep=25pt
             }
     ]
 
     % Título principal
-    \node[mainbox, fill=orange!80!black] (extraccion) {Extracción de Segmentos)};
+    \node[mainbox, fill=FormalOrange] (extraccion) {Extracción de Segmentos};
 
     % Sub-nodos
     \node[subbox, below=2cm of extraccion, xshift=-6cm] (ext1) {

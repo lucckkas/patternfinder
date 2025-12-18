@@ -57,14 +57,15 @@
 
     % CSV
     \node[csvfile, below=2cm of traduccion] (csv) {
-        \begin{tabular}{l}
-            \textbf{\large res.csv}\\[8pt]
-            \textbf{Patrón, Cantidad Mayúsculas, Cantidad Secuencias, Porcentaje}\\[4pt]
-            C-x(2)-C-x(16)-H, 3, 6, 100.00\%\\
-            C-x(4)-C-x(16)-H, 3, 5, 83.33\%\\
-            C-x(17)-C-x(2)-H, 3, 6, 100.00\%\\
-            C-x(4)-C-x(12)-H-x(3)-H, 4, 4, 66.67\%\\
-            ...
+        \textbf{\large res.csv}\\[8pt]
+        \begin{tabular}{p{8cm} c c r}
+        \textbf{Patrón} & \textbf{Mayúsculas} & \textbf{Secuencias} & \textbf{Porcentaje} \\
+        \hline
+        C-x(4,5)-C-x(11,12)-H-x(3,5)-H & 4 & 109 & 99.09\% \\
+        C-x(2)-C-x(11,12)-H-x(3,5)-H & 4 & 109 & 99.09\% \\
+        C-x(4)-C-x(1)-R-x(10)-H-x(3)-H & 5 & 5 & 4.55\% \\
+        C-x(2)-C-x(1)-R-x(10)-H-x(3)-H & 5 & 5 & 4.55\% \\
+        \multicolumn{4}{c}{...} \\
         \end{tabular}
     };
 

@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc, shadows}
+\input{diagrams/colors.tex}
 
 \begin{document}
 
@@ -43,7 +44,7 @@
                 text width=4.5cm,
                 font=\bfseries,
                 text=white,
-                fill=blue!70!black,
+                fill=FormalBlue,
                 drop shadow
             },
         % Estilo para archivo CSV
@@ -85,50 +86,50 @@
 
     % Grupo de entrada
     \begin{scope}[on background layer]
-        \node[groupbox=blue!70!black, fit=(pdb), inner sep=20pt, label={[font=\bfseries\Large, text=blue!70!black]above:ENTRADA}] (entrada) {};
+        \node[groupbox=FormalBlue, fit=(pdb), inner sep=20pt, label={[font=\bfseries\Large, text=FormalBlue]above:ENTRADA}] (entrada) {};
     \end{scope}
 
     % ============================================
     % EXTRACCIÓN DE AMINOÁCIDOS (Interactions.py)
     % ============================================
-    \node[mainbox, fill=orange!80!black, below=2.5cm of pdb] (extraccion) {Extracción de Segmentos};
+    \node[mainbox, fill=FormalOrange, below=2.5cm of pdb] (extraccion) {Extracción de Segmentos};
 
-    \node[subbox=orange!80!black, below=1.5cm of extraccion, xshift=-5cm] (ext1) {Parsear estructura\\con BioPython};
-    \node[subbox=orange!80!black, below=1.5cm of extraccion] (ext2) {NeighborSearch:\\filtrar por distancia\\al ligando};
-    \node[subbox=orange!80!black, below=1.5cm of extraccion, xshift=5cm] (ext3) {Extraer segmentos\\con mayúsculas};
+    \node[subbox=FormalOrange, below=1.5cm of extraccion, xshift=-5cm] (ext1) {Parsear estructura\\con BioPython};
+    \node[subbox=FormalOrange, below=1.5cm of extraccion] (ext2) {NeighborSearch:\\filtrar por distancia\\al ligando};
+    \node[subbox=FormalOrange, below=1.5cm of extraccion, xshift=5cm] (ext3) {Extraer segmentos\\con mayúsculas};
 
     % Grupo extracción
     \begin{scope}[on background layer]
-        \node[groupbox=orange!80!black, fit=(extraccion)(ext1)(ext2)(ext3), inner sep=20pt] (gext) {};
+        \node[groupbox=FormalOrange, fit=(extraccion)(ext1)(ext2)(ext3), inner sep=20pt] (gext) {};
     \end{scope}
 
 
     % ============================================
     % COMPARACIÓN LCS (batchcompare + patternfinder)
     % ============================================
-    \node[mainbox, fill=green!60!black, below=3.5cm of ext2] (comparacion) {Comparación mediante LCS};
+    \node[mainbox, fill=FormalGreen, below=3.5cm of ext2] (comparacion) {Comparación mediante LCS};
 
-    \node[subbox=green!60!black, below=1.5cm of comparacion, xshift=-5cm] (comp1) {Calcular matriz\\de LCS};
-    \node[subbox=green!60!black, below=1.5cm of comparacion] (comp2) {Backtracking:\\reconstruir\\subsecuencias};
-    \node[subbox=green!60!black, below=1.5cm of comparacion, xshift=5cm] (comp3) {Calcular gaps\\entre aminoácidos};
+    \node[subbox=FormalGreen, below=1.5cm of comparacion, xshift=-5cm] (comp1) {Calcular matriz\\de LCS};
+    \node[subbox=FormalGreen, below=1.5cm of comparacion] (comp2) {Backtracking:\\reconstruir\\subsecuencias};
+    \node[subbox=FormalGreen, below=1.5cm of comparacion, xshift=5cm] (comp3) {Calcular gaps\\entre aminoácidos};
 
     % Grupo comparación
     \begin{scope}[on background layer]
-        \node[groupbox=green!60!black, fit=(comparacion)(comp1)(comp2)(comp3), inner sep=20pt] (gcomp) {};
+        \node[groupbox=FormalGreen, fit=(comparacion)(comp1)(comp2)(comp3), inner sep=20pt] (gcomp) {};
     \end{scope}
 
     % ============================================
     % RECONSTRUCCIÓN DE PATRONES
     % ============================================
-    \node[mainbox, fill=red!70!black, below=3.5cm of comp2] (reconstruccion) {Reconstrucción de Patrones};
+    \node[mainbox, fill=FormalRed, below=3.5cm of comp2] (reconstruccion) {Reconstrucción de Patrones};
 
-    \node[subbox=red!70!black, below=1.5cm of reconstruccion, xshift=-5cm] (rec1) {Extraer patrones};
-    \node[subbox=red!70!black, below=1.5cm of reconstruccion] (rec2) {Contar mayúsculas\\(AA conservados)};
-    \node[subbox=red!70!black, below=1.5cm of reconstruccion, xshift=5cm] (rec3) {Agregar estadísticas\\por secuencia};
+    \node[subbox=FormalRed, below=1.5cm of reconstruccion, xshift=-5cm] (rec1) {Extraer patrones};
+    \node[subbox=FormalRed, below=1.5cm of reconstruccion] (rec2) {Contar mayúsculas\\(AA conservados)};
+    \node[subbox=FormalRed, below=1.5cm of reconstruccion, xshift=5cm] (rec3) {Agregar estadísticas\\por secuencia};
 
     % Grupo reconstrucción
     \begin{scope}[on background layer]
-        \node[groupbox=red!70!black, fit=(reconstruccion)(rec1)(rec2)(rec3), inner sep=20pt] (grec) {};
+        \node[groupbox=FormalRed, fit=(reconstruccion)(rec1)(rec2)(rec3), inner sep=20pt] (grec) {};
     \end{scope}
 
     % ============================================
@@ -155,22 +156,22 @@
     % ============================================
     % FLECHAS PRINCIPALES
     % ============================================
-    \draw[arrow=blue!70!black] (entrada.south) -- (extraccion.north);
+    \draw[arrow=FormalBlue] (entrada.south) -- (extraccion.north);
 
-    \draw[arrow=orange!80!black] (gext.south) -- ++(0,-0.6) -- (comparacion.north);
-    \draw[arrow=green!60!black] (gcomp.south) -- ++(0,-0.6) -- (reconstruccion.north);
-    \draw[arrow=red!70!black] (grec.south) -- ++(0,-0.6) -- (traduccion.north);
+    \draw[arrow=FormalOrange] (gext.south) -- ++(0,-0.6) -- (comparacion.north);
+    \draw[arrow=FormalGreen] (gcomp.south) -- ++(0,-0.6) -- (reconstruccion.north);
+    \draw[arrow=FormalRed] (grec.south) -- ++(0,-0.6) -- (traduccion.north);
     \draw[arrow=teal!80!black] (traduccion.south) -- (csv.north);
 
     % Flechas entre sub-nodos
-    \draw[arrow=orange!80!black, line width=1pt] (ext1.east) -- (ext2.west);
-    \draw[arrow=orange!80!black, line width=1pt] (ext2.east) -- (ext3.west);
+    \draw[arrow=FormalOrange, line width=1pt] (ext1.east) -- (ext2.west);
+    \draw[arrow=FormalOrange, line width=1pt] (ext2.east) -- (ext3.west);
 
-    \draw[arrow=green!60!black, line width=1pt] (comp1.east) -- (comp2.west);
-    \draw[arrow=green!60!black, line width=1pt] (comp2.east) -- (comp3.west);
+    \draw[arrow=FormalGreen, line width=1pt] (comp1.east) -- (comp2.west);
+    \draw[arrow=FormalGreen, line width=1pt] (comp2.east) -- (comp3.west);
 
-    \draw[arrow=red!70!black, line width=1pt] (rec1.east) -- (rec2.west);
-    \draw[arrow=red!70!black, line width=1pt] (rec2.east) -- (rec3.west);
+    \draw[arrow=FormalRed, line width=1pt] (rec1.east) -- (rec2.west);
+    \draw[arrow=FormalRed, line width=1pt] (rec2.east) -- (rec3.west);
 
 \end{tikzpicture}
 
