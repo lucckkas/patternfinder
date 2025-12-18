@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"unicode"
+
+	"github.com/lucckkas/patternfinder/internal/gaps"
 )
 
 func main() {
@@ -105,17 +107,17 @@ func main() {
 	}
 
 	// Mapa para recolectar estadísticas de patrones
-	patternStats := make(map[string]*PatternStat)
+	patternStats := make(map[string]*gaps.PatternStat)
 
 	var resultMap map[int]ComparisonResult
 
 	// Decidir entre ejecución secuencial o paralela
 	if *seq {
 		// Modo SECUENCIAL
-		resultMap = executeSequential(jobs, absPath, *showDP, *seq)
+		resultMap = executeSequential(jobs, absPath, *showDP)
 	} else {
 		// Modo PARALELO
-		resultMap = executeParallel(jobs, absPath, *showDP, *seq, *workers)
+		resultMap = executeParallel(jobs, absPath, *showDP, *workers)
 	}
 
 	// Escribir resultados en orden y recolectar patrones
@@ -144,7 +146,11 @@ func main() {
 
 	// Generar CSV si se especificó
 	if *csvFile != "" {
-		err := generateCSV(*csvFile, patternStats, len(sequences))
+		// Consolidar patrones antes de generar CSV
+		consolidatedStats := gaps.ConsolidatePatterns(patternStats)
+		fmt.Printf("Patrones antes de consolidar: %d, después: %d\n", len(patternStats), len(consolidatedStats))
+		
+		err := generateCSV(*csvFile, consolidatedStats, len(sequences))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error al generar CSV: %v\n", err)
 		} else {
@@ -172,7 +178,7 @@ type ComparisonResult struct {
 }
 
 // executeSequential ejecuta las comparaciones de forma secuencial
-func executeSequential(jobs []Job, absPath string, showDP, useSeq bool) map[int]ComparisonResult {
+func executeSequential(jobs []Job, absPath string, showDP bool) map[int]ComparisonResult {
 	resultMap := make(map[int]ComparisonResult)
 
 	for _, job := range jobs {
@@ -205,7 +211,7 @@ func executeSequential(jobs []Job, absPath string, showDP, useSeq bool) map[int]
 }
 
 // executeParallel ejecuta las comparaciones en paralelo con múltiples workers
-func executeParallel(jobs []Job, absPath string, showDP, useSeq bool, workers int) map[int]ComparisonResult {
+func executeParallel(jobs []Job, absPath string, showDP bool, workers int) map[int]ComparisonResult {
 	// Canal para enviar trabajos
 	jobsChan := make(chan Job, len(jobs))
 	// Canal para recibir resultados
@@ -303,13 +309,6 @@ func readSequences(filename string) ([]string, error) {
 	return sequences, nil
 }
 
-// PatternStat almacena estadísticas de un patrón
-type PatternStat struct {
-	Pattern         string
-	UppercaseCount  int
-	SequenceIndices map[int]bool // Índices de secuencias que contienen este patrón
-}
-
 // countUppercase cuenta las letras mayúsculas en una cadena
 func countUppercase(s string) int {
 	count := 0
@@ -322,7 +321,7 @@ func countUppercase(s string) int {
 }
 
 // extractPatterns extrae los patrones de la salida de patternfinder
-func extractPatterns(output string, stats map[string]*PatternStat, seqI, seqJ int) {
+func extractPatterns(output string, stats map[string]*gaps.PatternStat, seqI, seqJ int) {
 	// Buscar líneas que contienen patrones con el formato [n.m] pattern
 	// Ejemplo: [1.1] A-x(2)-B-x(3)-C
 	re := regexp.MustCompile(`\[\d+\.\d+\]\s+(.+)`)
@@ -339,7 +338,7 @@ func extractPatterns(output string, stats map[string]*PatternStat, seqI, seqJ in
 
 			// Si el patrón no existe, crearlo
 			if _, exists := stats[pattern]; !exists {
-				stats[pattern] = &PatternStat{
+				stats[pattern] = &gaps.PatternStat{
 					Pattern:         pattern,
 					UppercaseCount:  countUppercase(pattern),
 					SequenceIndices: make(map[int]bool),
@@ -354,7 +353,7 @@ func extractPatterns(output string, stats map[string]*PatternStat, seqI, seqJ in
 }
 
 // generateCSV genera un archivo CSV con las estadísticas de patrones
-func generateCSV(filename string, stats map[string]*PatternStat, totalSequences int) error {
+func generateCSV(filename string, stats map[string]*gaps.PatternStat, totalSequences int) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

@@ -1,14 +1,14 @@
 \subsection{Etapas de la Evaluación Cuantitativa}
 
-La evaluación cuantitativa complementa el uso del método científico mediante la recolección y análisis de datos numéricos para medir y validar los resultados:
+La evaluación cuantitativa complementó el uso del método científico mediante la recolección y análisis de datos numéricos para medir y validar los resultados:
 
-\paragraph{Definición de métricas} Se identificarán las métricas clave, como el tiempo de ejecución y el uso de recursos.
+\paragraph{Definición de métricas} Se identificaron las métricas clave, como el tiempo de ejecución total, tiempo de construcción de la matriz DP, tiempo de backtracking, speedup, eficiencia, y número de LCS encontradas.
 
-\paragraph{Recolección de datos} Durante la etapa de experimentación, se registrarán los tiempos de ejecución y el uso de recursos del sistema en múltiples escenarios de prueba.
+\paragraph{Recolección de datos} Durante la etapa de experimentación, se registraron los tiempos de ejecución y el uso de recursos del sistema en múltiples escenarios de prueba, evaluando secuencias de longitud 20 hasta 260 caracteres.
 
-\paragraph{Análisis estadístico} Los datos recolectados serán analizados estadísticamente para identificar patrones, diferencias significativas entre la versión secuencial y paralelizada, y la eficiencia de la paralelización. Este análisis permitirá validar si la paralelización logra mejorar el rendimiento del algoritmo conforme a los objetivos del proyecto.
+\paragraph{Análisis estadístico} Los datos recolectados fueron analizados estadísticamente para identificar patrones, diferencias significativas entre la versión secuencial y paralelizada, y la eficiencia de la paralelización. Este análisis permitió validar que la paralelización interna del algoritmo LCS presentó overhead significativo, mientras que la paralelización a nivel de comparaciones pareadas logró speedups de hasta 3.59x.
 
-\paragraph{Interpretación y presentación} Los resultados del análisis cuantitativo se interpretarán y se incluirán en la documentación final del proyecto, mostrando de forma clara el impacto de la paralelización en el rendimiento del algoritmo.
+\paragraph{Interpretación y presentación} Los resultados del análisis cuantitativo se interpretaron y se incluyeron en la documentación final del proyecto, mostrando de forma clara el impacto diferenciado de ambas estrategias de paralelización y proporcionando recomendaciones prácticas para futuros desarrollos.
 
-Este enfoque metodológico, que combina el Método Científico con una evaluación cuantitativa detallada, asegura que el proyecto se desarrolle de manera sistemática y objetiva, permitiendo validar de forma rigurosa las mejoras obtenidas y la consecución de los objetivos propuestos.
+Este enfoque metodológico, que combinó el Método Científico con una evaluación cuantitativa detallada, aseguró que el proyecto se desarrollara de manera sistemática y objetiva, permitiendo validar de forma rigurosa tanto los resultados esperados como los inesperados, contribuyendo al conocimiento sobre cuándo y cómo aplicar paralelización efectivamente.
 

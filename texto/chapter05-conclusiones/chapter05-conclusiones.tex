@@ -30,13 +30,13 @@ La implementación paralela mantuvo la corrección del algoritmo, generando exac
 
 \subsection{Evaluación experimental}
 
-Se realizaron benchmarks exhaustivos comparando ambas implementaciones con secuencias aleatorias de longitud creciente (20 a 200 caracteres). Los resultados revelaron hallazgos importantes:
+Se realizaron benchmarks exhaustivos comparando ambas implementaciones con secuencias aleatorias de longitud creciente (20 a 260 caracteres). Los resultados revelaron hallazgos importantes:
 
 \begin{itemize}
-    \item La versión secuencial fue consistentemente más rápida, con un speedup promedio de 0.17x (la versión paralela resultó ~6 veces más lenta).
-    \item El componente de construcción de tabla DP mostró el mayor overhead (speedup 0.03x, ~33 veces más lento).
-    \item El backtracking paralelo, aunque mejor que el DP, también fue más lento (speedup 0.21x, ~5 veces más lento).
-    \item El número de LCS encontradas crece exponencialmente, alcanzando 186,744 subsecuencias para secuencias de longitud 200.
+    \item La versión secuencial fue consistentemente más rápida en todo el rango evaluado, con un speedup promedio de 0.37x (la versión paralela resultó aproximadamente 2.7 veces más lenta en promedio).
+    \item El componente de construcción de tabla DP mostró la mayor sobrecarga al crear y sincronizar goroutines, con speedup entre 0.01x y 0.04x, siendo aproximadamente 30-50 veces más lento que la versión secuencial.
+    \item El backtracking paralelo mostró mejor rendimiento relativo que el llenado de la tabla. Para secuencias pequeñas (20-90 caracteres), el speedup fue de 0.26x-0.37x, pero mejoró progresivamente alcanzando 0.66x-0.74x para secuencias largas (180-260 caracteres), indicando una tendencia positiva con el tamaño del problema.
+    \item El número de LCS encontradas crece exponencialmente, alcanzando 186,744 subsecuencias para secuencias de longitud 200 y 379,512 para longitud 260.
 \end{itemize}
 
 \section{Cumplimiento de objetivos}
@@ -171,8 +171,6 @@ Sin embargo, esta discrepancia no invalida el trabajo realizado. Por el contrari
     \item \textbf{Tipo de secuencias}: Se utilizaron únicamente secuencias generadas aleatoriamente. Secuencias reales de proteínas podrían tener características diferentes (menor entropía, patrones repetitivos) que afecten el número de bifurcaciones y, por tanto, el rendimiento relativo.
 
     \item \textbf{Hardware específico}: Los experimentos se ejecutaron en un único sistema. El comportamiento podría variar en sistemas con diferente arquitectura, número de núcleos, o características de cache.
-
-    \item \textbf{Configuración de paralelismo}: No se exploró sistemáticamente el impacto de limitar el número de goroutines concurrentes o ajustar el tamaño del grano de paralelismo.
 \end{enumerate}
 
 \subsection{Limitaciones técnicas}
@@ -188,11 +186,9 @@ Sin embargo, esta discrepancia no invalida el trabajo realizado. Por el contrari
 \subsection{Limitaciones del alcance}
 
 \begin{enumerate}
-    \item \textbf{Comparación con otros enfoques}: No se comparó con algoritmos alternativos para descubrimiento de patrones (e.g., expresiones regulares, autómatas finitos, algoritmos aproximados).
-
     \item \textbf{Aplicación a casos reales}: No se evaluó el algoritmo con datasets reales de proteínas y ligandos del Protein Data Bank.
 
-    \item \textbf{Análisis de escalabilidad}: No se estudió formalmente cómo escala el rendimiento con el número de núcleos disponibles.
+    \item \textbf{Análisis de escalabilidad}: No se estudió formalmente cómo escala el rendi-miento con el número de núcleos disponibles.
 \end{enumerate}
 
 \section{Trabajo futuro y proyecciones}
@@ -201,17 +197,13 @@ Sin embargo, esta discrepancia no invalida el trabajo realizado. Por el contrari
 
 \begin{enumerate}
     \item \textbf{Grano de paralelismo adaptativo}: Implementar heurísticas que decidan dinámicamente cuándo crear goroutines basándose en el tamaño del problema y la carga actual del sistema. Por ejemplo, solo paralelizar si la diagonal tiene más de $N$ celdas o si el árbol de backtracking supera cierta profundidad.
-
-    \item \textbf{Pool de workers}: En lugar de crear y destruir goroutines constantemente, utilizar un pool fijo de workers que procesen tareas de una cola. Esto reduciría el overhead de creación de threads.
-
-    \item \textbf{Estructuras lock-free}: Explorar el uso de estructuras de datos lock-free o wait-free para el registro de caminos visitados, reduciendo la contención en sincronización. Por ejemplo, concurrent maps o tries lock-free.
+    
+    \item \textbf{Estructuras de datos lock-free}: Explorar estructuras de datos concurrentes que reduzcan la contención en el registro de caminos visitados, como tablas hash lock-free o técnicas de versionado.
 \end{enumerate}
 
 \subsection{Enfoques alternativos de paralelización}
 
 \begin{enumerate}
-    \item \textbf{Paralelismo de tareas}: En lugar de paralelizar internamente el algoritmo LCS, procesar múltiples pares de secuencias en paralelo. Esta aproximación tiene granularidad más gruesa y menor necesidad de sincronización.
-
     \item \textbf{GPU computing}: Explorar la paralelización en GPU utilizando CUDA o OpenCL, donde el modelo de ejecución SIMD puede ser beneficioso para el cálculo de la matriz DP.
 
     \item \textbf{Computación distribuida}: Para análisis masivos de datasets completos, considerar frameworks de computación distribuida como Apache Spark o Hadoop.

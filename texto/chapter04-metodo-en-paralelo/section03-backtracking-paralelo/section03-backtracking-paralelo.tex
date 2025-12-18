@@ -1,4 +1,5 @@
 \section{Backtracking paralelo}
+\label{Backtracking paralelo}
 
 El recorrido inverso se maneja mediante \texttt{BacktrackingParallel}, que reconstruye todas las subsecuencias comunes más largas explorando el camino desde la esquina inferior derecha hasta el origen. La función utiliza detección de caminos duplicados para evitar que múltiples goroutines exploren el mismo camino con el mismo patrón parcial, y paraleliza la exploración cuando hay múltiples opciones:
 

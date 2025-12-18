@@ -1,6 +1,6 @@
 \subsection{Ejemplo ilustrativo del llenado de la matriz LCS}
 
-Para ilustrar el llenado paso a paso de la matriz LCS se utilizan las cadenas $S_1 = \texttt{BABCBDABB}$ (ubicada en el eje horizontal superior) y $S_2 = \texttt{DBDCABA}$ (ubicada en el eje vertical). Las imágenes muestran una matriz de $11 \times 9$ celdas en la que la primera fila y la primera columna corresponden a los caracteres de las cadenas. Cada figura captura un instante específico del proceso.
+Para ilustrar el llenado paso a paso de la matriz LCS se utilizan las cadenas $S_1 = \texttt{BABCBDABB}$ (ubicada en el eje horizontal superior) y $S_2 = \texttt{DBDCABA}$ (ubicada en el eje vertical). Las siguientes imágenes muestran una matriz de $11 \times 9$ celdas en la que la primera fila y la primera columna corresponden a los caracteres de las cadenas. Cada figura captura un instante específico del proceso.
 
 \begin{figure}[H]
     \centering
@@ -17,25 +17,25 @@ Para ilustrar el llenado paso a paso de la matriz LCS se utilizan las cadenas $S
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_03.png}
-    \caption[Ejemplo secuencial: Paso 1 - D vs B]{Se completa la segunda fila (tercera si consideramos la fila de la cadena pero esta es solo ilustrativa) comparando la primera letra de $S_2$ (\texttt{D}) con cada símbolo de $S_1$ (\texttt{B} en este primer paso).}
+    \caption[Ejemplo secuencial: Paso 1 - D vs B]{Se completa la segunda fila (tercera si consideramos la fila de la cadena pero esta es solo ilustrativa) comparando la primera letra de $S_2$ (\texttt{D}) con cada símbolo de $S_1$ (\texttt{B} con \texttt{D}). No hay coincidencia, por lo que se hereda el máximo entre izquierda y arriba, resultando en ceros.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_04.png}
-    \caption[Ejemplo secuencial: Paso 2 - D vs A]{Segundo paso: la primera letra de $S_2$ (\texttt{D}) se compara con la segunda letra de $S_1$ (\texttt{A}), heredando el máximo entre izquierda y arriba.}
+    \caption[Ejemplo secuencial: Paso 2 - D vs A]{Segundo paso: la primera letra de $S_2$ (\texttt{D}) se compara con la segunda letra de $S_1$ (\texttt{A}) no coinciden por lo que hereda el máximo entre izquierda y arriba.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_05.png}
-    \caption[Ejemplo secuencial: Paso 3 - D vs B]{tercer paso: la letra \texttt{D} de $S_2$ se compara con la tercera letra de $S_1$ (\texttt{B}), manteniendo el valor máximo entre izquierda y arriba.}
+    \caption[Ejemplo secuencial: Paso 3 - D vs B]{Tercer paso: la letra \texttt{D} de $S_2$ se compara con la tercera letra de $S_1$ (\texttt{B}) no coinciden por lo que hereda el máximo entre izquierda y arriba.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_06.png}
-    \caption[Ejemplo secuencial: Paso 4 - D vs C]{cuarto paso: la letra \texttt{D} de $S_2$ se compara con la cuarta letra de $S_1$ (\texttt{C}), sin coincidencia y heredando el máximo entre izquierda y arriba.}
+    \caption[Ejemplo secuencial: Paso 4 - D vs C]{Cuarto paso: la letra \texttt{D} de $S_2$ se compara con la cuarta letra de $S_1$ (\texttt{C}) no coinciden por lo que hereda el máximo entre izquierda y arriba.}
 \end{figure}
 
 \begin{figure}[H]
@@ -65,13 +65,13 @@ Para ilustrar el llenado paso a paso de la matriz LCS se utilizan las cadenas $S
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_11.png}
-    \caption[Ejemplo secuencial: Paso 9 - D vs B]{Noveno paso: la letra \texttt{D} de $S_2$ se compara con la novena letra de $S_1$ (\texttt{B}), heredando el máximo entre izquierda y arriba.}
+    \caption[Ejemplo secuencial: Paso 9 - D vs B]{Noveno paso: la letra \texttt{D} de $S_2$ se compara con la novena letra de $S_1$ (\texttt{B}), heredando el máximo entre izquierda y arriba. Se completó la segunda fila (tercera si consideramos la fila de la cadena pero esta es solo ilustrativa), pasamos a la siguiente letra de $S_2$}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Sec_example/Sec_example_12.png}
-    \caption[Ejemplo secuencial: Paso 10 - B vs B (coincidencia)]{Décimo paso: se completó la segunda fila (tercera si consideramos la fila de la cadena pero esta es solo ilustrativa), pasamos a la siguiente letra de $S_2$ (\texttt{B}) comparamos con la primera letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
+    \caption[Ejemplo secuencial: Paso 10 - B vs B (coincidencia)]{Décimo paso: comparamos primera letra de $S_2$ (\texttt{B}) con la primera letra de $S_1$ (\texttt{B}), generando una coincidencia y aumentando la diagonal en 1.}
 \end{figure}
 
 \begin{figure}[H]
@@ -128,4 +128,4 @@ Para ilustrar el llenado paso a paso de la matriz LCS se utilizan las cadenas $S
     \caption[Ejemplo secuencial: Matriz completa]{Matriz LCS completa después de procesar todas las letras de ambas cadenas. El valor en la esquina inferior derecha (4) indica la longitud de la subsecuencia común más larga (o las más largas) entre $S_1$ y $S_2$.}
     \end{figure}
 
-El proceso de recuperar las subsecuencias comunes a partir de la matriz LCS no se ilustra aquí, pero se puede consultar en la versión paralela del algoritmo (con la diferencia de que en el caso secuencial se guardan las coincidencias para su posterior análisis).
+El proceso de recuperar las subsecuencias comunes a partir de la matriz LCS no se ilustra aquí, pero se puede consultar en la versión paralela del algoritmo (sección \ref{Backtracking paralelo}), con la diferencia de que en el caso secuencial se guardan las coincidencias para su posterior análisis.

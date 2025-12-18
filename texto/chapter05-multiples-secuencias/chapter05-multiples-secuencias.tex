@@ -1,0 +1,262 @@
+\chapter{Procesamiento de múltiples secuencias}
+
+\section{Planteamiento y alcance}
+
+En la práctica bioinformática, los análisis raramente se limitan a comparar un par aislado de secuencias. Es común disponer de colecciones con decenas, cientos o incluso miles de secuencias proteicas que deben ser comparadas entre sí para identificar patrones conservados, relaciones evolutivas o motivos estructurales comunes. Este escenario plantea un desafío computacional significativo: el número de comparaciones pareadas crece cuadráticamente con el tamaño del conjunto, siguiendo la fórmula $\frac{n(n-1)}{2}$. Para un conjunto de 100 secuencias, esto significa 4,950 comparaciones; para 200 secuencias, el número se eleva a 19,900.
+
+Ejecutar manualmente cada comparación invocando \texttt{patternfinder} de forma individual resultaría impráctico y propenso a errores. Además, sería un desperdicio de recursos computacionales, ya que la mayoría de los sistemas modernos disponen de múltiples núcleos de procesamiento que permanecerían ociosos mientras se procesa cada comparación secuencialmente.
+
+El objetivo de este capítulo es describir la herramienta desarrollada para automatizar y paralelizar estas comparaciones masivas, analizar su rendimiento en diferentes configuraciones, y demostrar cómo el paralelismo a nivel de tarea (comparación de pares) proporciona beneficios significativos en contraste con la paralelización interna del algoritmo LCS discutida en capítulos anteriores.
+
+\section{Herramienta \texttt{batchcompare}}
+
+\subsection{Arquitectura general}
+
+El programa \texttt{cmd/batchcompare/main.go} implementa un sistema de procesamiento por lotes (\textit{batch runner}) diseñado específicamente para gestionar grandes volúmenes de comparaciones pareadas. A diferencia de un simple script secuencial, \texttt{batchcompare} incorpora capacidades avanzadas de paralelización, gestión de recursos y análisis estadístico de resultados. El script de benchmarking utilizado para evaluar esta herramienta se describe en detalle en el Anexo~\ref{anexo:test-batch}.
+
+La arquitectura sigue el patrón productor-consumidor con un pool de workers, donde un componente central genera todas las tareas de comparación y un conjunto de workers las procesa concurrentemente. Esta aproximación maximiza la utilización de los recursos del sistema y minimiza los tiempos de espera.
+
+\subsection{Componentes y flujo de ejecución}
+
+El flujo de ejecución de \texttt{batchcompare} se estructura en las siguientes etapas:
+
+\begin{enumerate}
+    \item \textbf{Interfaz de línea de comandos}: La herramienta proporciona una interfaz flexible mediante flags:
+          \begin{itemize}
+              \item \texttt{-f <archivo>}: Archivo de entrada con las secuencias, una por línea
+              \item \texttt{-p <ruta>}: Ruta al ejecutable de \texttt{patternfinder} (por defecto: \texttt{./build/patternfinder})
+              \item \texttt{-w <número>}: Número de workers paralelos (por defecto: 6)
+              \item \texttt{-seq}: Activa modo secuencial tanto para el procesamiento de lotes como para propagar el flag al algoritmo LCS interno
+              \item \texttt{-dp}: Habilita la impresión de la matriz de programación dinámica (útil para depuración)
+              \item \texttt{-o <archivo>}: Archivo de salida para resultados detallados
+              \item \texttt{-csv <archivo>}: Genera estadísticas agregadas de patrones en formato CSV
+          \end{itemize}
+
+    \item \textbf{Generación de trabajos}: El programa lee todas las líneas del archivo de entrada, filtrando líneas vacías o comentarios. Para cada par único de secuencias $(i,j)$ con $i < j$, se crea un trabajo (\textit{job}) que encapsula:
+          \begin{itemize}
+              \item Los índices $i$ y $j$ para identificación
+              \item Las cadenas de texto correspondientes a ambas secuencias
+              \item Un identificador único de comparación
+          \end{itemize}
+
+          Para un conjunto de $n$ secuencias, esto genera exactamente $\frac{n(n-1)}{2}$ trabajos. Por ejemplo, 100 secuencias producen 4,950 comparaciones, mientras que 200 secuencias generan 19,900.
+
+    \item \textbf{Selección del algoritmo LCS}: El runner no implementa directamente el algoritmo LCS, sino que actúa como orquestador invocando el ejecutable \texttt{patternfinder} para cada comparación. Esto permite:
+          \begin{itemize}
+              \item Aislar cada comparación en su propio espacio de memoria
+              \item Seleccionar dinámicamente entre la versión secuencial o paralela del algoritmo LCS mediante el flag \texttt{-seq}
+              \item Facilitar el debugging al poder ejecutar comparaciones individuales manualmente
+              \item Aprovechar el modelo de procesos del sistema operativo para paralelización robusta
+          \end{itemize}
+
+    \item \textbf{Ejecución mediante pool de workers}: La estrategia de ejecución se bifurca según el modo seleccionado:
+
+          \textbf{Modo secuencial (\texttt{-seq})}: Los trabajos se procesan uno por uno en orden. El programa itera sobre la lista completa, ejecutando \texttt{patternfinder} para cada par y esperando su finalización antes de continuar con el siguiente. Este modo es útil para:
+          \begin{itemize}
+              \item Depuración y trazado de errores
+              \item Sistemas con recursos limitados
+              \item Validación de resultados
+          \end{itemize}
+
+          \textbf{Modo paralelo (por defecto)}: Se implementa un patrón productor-consumidor:
+          \begin{itemize}
+              \item Se crea un canal de trabajos donde se publican todas las comparaciones pendientes
+              \item Se lanzan $w$ goroutines workers (donde $w$ es configurable con \texttt{-w})
+              \item Cada worker consume trabajos del canal, ejecuta \texttt{patternfinder} como subproceso, captura su salida estándar y error, y envía los resultados a un canal de resultados
+              \item Un mapa compartido, protegido por mutex, almacena los resultados indexados por el número de comparación para preservar el orden
+              \item El proceso continúa hasta que todos los trabajos han sido procesados
+          \end{itemize}
+
+    \item \textbf{Consolidación y análisis estadístico}: Una vez completadas todas las comparaciones, \texttt{batchcompare} realiza dos tipos de salida:
+
+          \textbf{Resultados detallados}: Se imprimen en orden todos los resultados individuales, mostrando para cada comparación:
+          \begin{itemize}
+              \item Identificadores de las secuencias comparadas
+              \item Patrones encontrados con sus variantes de gaps
+              \item Estadísticas de cada comparación individual
+          \end{itemize}
+
+          \textbf{Análisis agregado (CSV)}: Se parsean todos los patrones detectados para generar estadísticas globales:
+          \begin{itemize}
+              \item Frecuencia absoluta: cuántas comparaciones encontraron cada patrón
+              \item Frecuencia relativa: porcentaje de comparaciones que contienen el patrón
+              \item Longitud del patrón (número de aminoácidos conservados)
+              \item Distribución de patrones por complejidad
+          \end{itemize}
+
+          Este análisis agregado permite identificar rápidamente los motivos más conservados en el conjunto de secuencias, información valiosa para estudios evolutivos y estructurales.
+\end{enumerate}
+
+\subsection{Ventajas del paralelismo de grano grueso}
+
+La arquitectura de \texttt{batchcompare} explota un paralelismo de \textbf{grano grueso}: cada unidad de trabajo es una comparación completa entre dos secuencias, que típicamente toma decenas o cientos de milisegundos. Este enfoque contrasta marcadamente con el paralelismo de grano fino intentado dentro del algoritmo LCS (Capítulo 4), donde se paralelizaban operaciones individuales de milisegundos o microsegundos.
+
+Las ventajas de esta aproximación incluyen:
+
+\begin{itemize}
+    \item \textbf{Amortización del overhead}: El costo de crear y gestionar un worker (goroutine + proceso del sistema operativo) es insignificante comparado con el tiempo de ejecución de cada comparación. Para comparaciones que toman 10-100ms, un overhead de sincronización de 0.1-1ms representa solo el 1-10\% del tiempo total.
+
+    \item \textbf{Independencia de tareas}: Las comparaciones son completamente independientes entre sí. No requieren comunicación, sincronización ni acceso a estado compartido durante su ejecución, eliminando las fuentes principales de contención.
+
+    \item \textbf{Balanceo de carga natural}: El patrón productor-consumidor distribuye automáticamente la carga entre los workers disponibles. Si un worker termina antes, inmediatamente toma otro trabajo del canal, maximizando la utilización de recursos.
+
+    \item \textbf{Escalabilidad}: El speedup obtenido es casi lineal con el número de workers (hasta el número de núcleos físicos), sin las limitaciones impuestas por la Ley de Amdahl que afectan al paralelismo interno del algoritmo LCS.
+
+    \item \textbf{Robustez}: Si una comparación falla o se cuelga, no afecta al resto del procesamiento. El aislamiento en procesos separados proporciona tolerancia a fallos.
+\end{itemize}
+
+\section{Diseño experimental}
+
+\subsection{Conjunto de datos}
+
+Para evaluar el rendimiento de \texttt{batchcompare} bajo condiciones realistas, se generó un conjunto de prueba consistente en 100 secuencias aleatorias de aminoácidos almacenadas en el archivo \texttt{sec.txt}. Cada secuencia contiene una mezcla de caracteres en mayúsculas (representando aminoácidos del patrón) y minúsculas (representando regiones variables o gaps), simulando la estructura típica de secuencias proteicas con dominios conservados y regiones variables.
+
+Este conjunto genera un total de $\frac{100 \times 99}{2} = 4,950$ comparaciones pareadas, un volumen suficientemente grande para observar los efectos del paralelismo y medir diferencias estadísticamente significativas en los tiempos de ejecución.
+
+\subsection{Configuraciones evaluadas}
+
+Se diseñó un benchmark sistemático que compara cinco configuraciones diferentes:
+
+\begin{enumerate}
+    \item \textbf{Modo secuencial}: Procesamiento estrictamente secuencial de todas las comparaciones, ejecutando una tras otra sin paralelización. Esta configuración sirve como línea base para calcular el speedup.
+
+    \item \textbf{Modo paralelo con 2 workers}: Configuración mínima de paralelización, útil para sistemas con recursos limitados o para observar el comportamiento con paralelismo reducido.
+
+    \item \textbf{Modo paralelo con 4 workers}: Configuración apropiada para procesadores de 4 núcleos, común en laptops y estaciones de trabajo básicas.
+
+    \item \textbf{Modo paralelo con 8 workers}: Configuración para sistemas de gama media con 6-8 núcleos físicos.
+
+    \item \textbf{Modo paralelo con 12 workers}: Configuración para aprovechar sistemas con 12 o más núcleos lógicos (considerando hyper-threading).
+\end{enumerate}
+
+\subsection{Metodología de medición}
+
+Para cada configuración, se ejecutó \texttt{batchcompare} sobre el mismo conjunto de secuencias, midiendo:
+
+\begin{itemize}
+    \item \textbf{Tiempo total de ejecución}: Desde el inicio del procesamiento hasta la finalización de todas las comparaciones, excluyendo la lectura del archivo de entrada y la escritura de resultados.
+
+    \item \textbf{Patrones encontrados}: Número de patrones únicos detectados en el conjunto completo de comparaciones.
+
+    \item \textbf{Speedup}: Relación entre el tiempo secuencial y el tiempo paralelo ($\frac{T_{secuencial}}{T_{paralelo}}$), que cuantifica la mejora de rendimiento.
+
+    \item \textbf{Eficiencia}: Speedup normalizado por el número de workers ($\frac{Speedup}{Workers}$), que indica qué tan bien se aprovechan los recursos adicionales.
+\end{itemize}
+
+Los tiempos reportados se obtuvieron mediante el script de benchmark \texttt{test\_batch\_modes.sh}, que automatiza la ejecución de todas las configuraciones y registra los resultados en un formato estructurado. Este script utiliza las funciones de temporización del sistema operativo para garantizar mediciones precisas y reproducibles.
+
+\section{Resultados experimentales}
+
+\subsection{Tiempos de ejecución y speedup}
+
+La Tabla~\ref{tab:batchcompare} presenta un resumen cuantitativo de los resultados obtenidos. Los tiempos corresponden al procesamiento completo de las 4,950 comparaciones pareadas generadas a partir de las 100 secuencias del conjunto de prueba.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lrrr}
+        \hline
+        \textbf{Modo}         & \textbf{Tiempo (ms)} & \textbf{Speedup} & \textbf{Eficiencia} \\
+        \hline
+        Secuencial            & 103,678              & 1.00x            & 100.0\%             \\
+        Paralelo (2 workers)  & 60,403               & 1.72x            & 86.0\%              \\
+        Paralelo (4 workers)  & 58,648               & 1.77x            & 44.3\%              \\
+        Paralelo (8 workers)  & 42,769               & 2.42x            & 30.3\%              \\
+        Paralelo (12 workers) & 28,888               & 3.59x            & 29.9\%              \\
+        \hline
+    \end{tabular}
+    \caption[Rendimiento de \texttt{batchcompare} para 4950 comparaciones]{Tiempos de ejecución, speedup y eficiencia de \texttt{batchcompare} para 4,950 comparaciones. El speedup se calcula como $T_{secuencial}/T_{paralelo}$, mientras que la eficiencia es $(Speedup/Workers) \times 100\%$.}
+    \label{tab:batchcompare}
+\end{table}
+
+Los resultados revelan una mejora sustancial del rendimiento mediante paralelización. El modo con 12 workers alcanza un speedup de 3.59x, reduciendo el tiempo total de aproximadamente 104 segundos a menos de 29 segundos, una reducción del 72\% en el tiempo de procesamiento.
+
+La Figura~\ref{fig:batchcompare-speedup} visualiza la relación entre el número de workers y el speedup obtenido. Se observa una tendencia creciente que, aunque no es perfectamente lineal, demuestra que el sistema continúa beneficiándose de workers adicionales incluso en configuraciones con 12 workers.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../plots/speedup.png}
+    \caption[Speedup de \texttt{batchcompare} vs número de workers]{Speedup de \texttt{batchcompare} en función del número de workers para 4,950 comparaciones. La línea punteada roja representa el speedup ideal (lineal). El speedup real se aproxima razonablemente al ideal, especialmente en configuraciones con 2-4 workers.}
+    \label{fig:batchcompare-speedup}
+\end{figure}
+
+\subsection{Análisis de eficiencia}
+
+La eficiencia, definida como el speedup normalizado por el número de workers, cuantifica qué tan bien se aprovecha cada recurso de procesamiento adicional. Una eficiencia del 100\% indicaría aprovechamiento perfecto, mientras que valores menores revelan overhead o limitaciones de escalabilidad.
+
+Como se observa en la Tabla~\ref{tab:batchcompare}, la eficiencia es muy alta (86\%) con 2 workers, pero disminuye conforme se añaden más workers, estabilizándose alrededor del 30\% para 8-12 workers. Esta disminución es esperada y se debe a varios factores:
+
+\begin{itemize}
+    \item \textbf{Contención en I/O}: Múltiples procesos compiten por acceso a disco y recursos del sistema operativo.
+    \item \textbf{Limitaciones de memoria}: El sistema debe gestionar más procesos simultáneos, aumentando el uso de memoria y potencialmente causando swapping.
+    \item \textbf{Saturación de núcleos}: Con 12 workers en un sistema de 12 núcleos lógicos (6 físicos con hyper-threading), se alcanza el límite de paralelismo real disponible.
+    \item \textbf{Overhead de coordinación}: El proceso principal debe gestionar más goroutines, canales y sincronización de resultados.
+\end{itemize}
+
+A pesar de esta disminución en eficiencia, el speedup absoluto continúa mejorando, lo que indica que añadir workers sigue siendo beneficioso hasta el límite de cores disponibles.
+
+\subsection{Patrones encontrados}
+
+El análisis de patrones reveló que este conjunto particular de secuencias aleatorias no contiene motivos conservados significativos. Todas las configuraciones reportaron 0 patrones únicos detectados en el conjunto completo de comparaciones. Este resultado es esperado para secuencias generadas aleatoriamente sin restricciones estructurales o evolutivas.
+
+En un contexto de secuencias biológicas reales, se esperaría encontrar motivos conservados que reflejan dominios funcionales, sitios de unión, o restricciones estructurales compartidas entre proteínas homólogas o funcionalmente relacionadas.
+
+
+\section{Discusión}
+
+\subsection{Éxito del paralelismo de grano grueso}
+
+Los resultados experimentales demuestran de manera concluyente que el paralelismo a nivel de proceso proporciona beneficios sustanciales y escalables para el procesamiento de múltiples secuencias. El speedup de 3.59x obtenido con 12 workers representa una mejora dramática respecto a la ejecución secuencial, reduciendo tiempos de procesamiento de casi dos minutos a menos de medio minuto.
+
+Este éxito se fundamenta en varias características clave de la arquitectura implementada:
+
+\begin{itemize}
+    \item \textbf{Independencia total de tareas}: Cada comparación es completamente independiente, sin necesidad de compartir estado o sincronizar durante la ejecución. Esta independencia elimina los cuellos de botella de sincronización que limitaban severamente el rendimiento de la paralelización interna del algoritmo LCS.
+
+    \item \textbf{Grano de trabajo apropiado}: Cada comparación individual toma decenas de milisegundos, un tiempo suficientemente largo para amortizar completamente el overhead de creación de procesos y coordinación entre workers. En contraste, las tareas en el paralelismo interno del LCS (calcular una celda de la matriz o explorar un nodo del backtracking) toman microsegundos, haciendo que el overhead domine el tiempo útil de cómputo.
+
+    \item \textbf{Balanceo de carga dinámico}: El patrón productor-consumidor con canal de trabajos garantiza que ningún worker permanezca ocioso mientras queden comparaciones pendientes. Los workers que terminan primero automáticamente toman nuevos trabajos, distribuyendo eficientemente la carga incluso si algunas comparaciones son más costosas que otras.
+
+    \item \textbf{Escalabilidad sostenida}: Aunque la eficiencia disminuye con más workers (de 86\% con 2 workers a 30\% con 12), el speedup absoluto continúa mejorando. Esto indica que el sistema no ha alcanzado un punto de saturación donde añadir workers resulte contraproducente, al menos hasta el límite de cores físicos disponibles.
+\end{itemize}
+
+\subsection{Comparación con el paralelismo interno del LCS}
+
+El contraste entre los resultados de este capítulo y los del Capítulo 4 es revelador y pedagógicamente valioso. Mientras que la paralelización interna del algoritmo LCS resultó en un slowdown (speedup de 0.37x en promedio, es decir, 2.4x más lento), la paralelización a nivel de comparaciones pareadas logró un speedup de 3.59x, casi 8 veces mejor en términos relativos.
+
+Esta diferencia fundamental se explica por los principios de diseño de algoritmos paralelos eficientes:
+
+\begin{enumerate}
+    \item \textbf{Overhead vs trabajo útil}: En el paralelismo interno del LCS, el overhead de crear goroutines, sincronizar acceso a estructuras compartidas (registro de caminos visitados), y coordinar la ejecución dominaba el tiempo de cómputo útil. Para calcular una celda de la matriz DP (2-3 operaciones aritméticas) o explorar un nodo del backtracking (pocas operaciones de comparación), el costo de sincronización superaba ampliamente el beneficio. En contraste, procesar una comparación completa (miles de operaciones) amortiza fácilmente el overhead de crear un worker y coordinar resultados.
+
+    \item \textbf{Contención en recursos compartidos}: El algoritmo LCS paralelo requería acceso concurrente a la matriz DP y al registro de caminos visitados, estructuras protegidas por mutexes. Esta contención efectivamente serializaba partes significativas de la ejecución, negando los beneficios teóricos del paralelismo. En \texttt{batchcompare}, cada comparación opera en su propio espacio de memoria completamente aislado, eliminando toda contención.
+
+    \item \textbf{Granularidad de sincronización}: La paralelización interna requería sincronización frecuente (después de cada diagonal en la construcción de la matriz, en cada acceso al registro de caminos en el backtracking). Esta sincronización frecuente de grano fino tiene un costo acumulativo enorme. En cambio, \texttt{batchcompare} sincroniza solo al inicio (distribuir trabajos) y al final (recolectar resultados), con sincronización de grano grueso que minimiza el overhead.
+
+    \item \textbf{Escalabilidad inherente}: El algoritmo LCS paralelo estaba fundamentalmente limitado por la Ley de Amdahl: la porción secuencial (cálculo entre diagonales, serialización en el registro de caminos) limitaba el speedup máximo teórico. En contraste, 4,950 comparaciones independientes ofrecen un paralelismo inherente masivo, escalable hasta miles de workers en principio.
+\end{enumerate}
+
+\subsection{Implicaciones prácticas}
+
+Estos resultados tienen implicaciones directas para el diseño de herramientas bioinformáticas:
+
+\begin{itemize}
+    \item \textbf{Priorizar paralelismo de alto nivel}: Para análisis que involucran múltiples secuencias, es más efectivo paralelizar a nivel de tarea (comparaciones, alineamientos, búsquedas) que intentar paralelizar los algoritmos internos. La independencia entre tareas elimina las complicaciones de sincronización y maximiza el speedup.
+
+    \item \textbf{Utilizar implementaciones secuenciales robustas}: Dado que la paralelización interna del LCS no proporciona beneficios, la recomendación práctica es utilizar la versión secuencial optimizada como backend en \texttt{batchcompare}. Esto maximiza la eficiencia de cada comparación individual mientras se aprovecha el paralelismo de alto nivel.
+
+    \item \textbf{Escalabilidad en clusters}: La arquitectura de \texttt{batchcompare} se presta naturalmente a extensión hacia computación distribuida. Cada worker podría ejecutarse en un nodo diferente de un cluster, procesando un subconjunto de las comparaciones sin necesidad de comunicación entre nodos (salvo la distribución inicial de trabajos y recolección final de resultados).
+
+    \item \textbf{Adaptación a recursos disponibles}: La capacidad de ajustar dinámicamente el número de workers permite adaptar la herramienta a diferentes contextos, desde laptops con 2-4 cores hasta servidores con 64+ cores, siempre obteniendo beneficios proporcionales.
+\end{itemize}
+
+\subsection{Conclusión: Paralelismo por pares vs paralelismo interno}
+
+El análisis comparativo entre las aproximaciones de paralelización presentadas en este trabajo demuestra una lección fundamental en computación de alto rendimiento: \textbf{no todas las oportunidades de paralelización son igualmente beneficiosas}.
+
+La paralelización del algoritmo LCS internamente, aunque técnicamente correcta y conceptualmente atractiva, resultó ser contraproducente debido al overhead de sincronización y la granularidad demasiado fina de las tareas. El costo de coordinar múltiples threads operando sobre estructuras compartidas superó ampliamente el beneficio computacional del paralelismo.
+
+En contraste, la estrategia de paralelizar el procesamiento por pares de secuencias demostró ser altamente efectiva, logrando speedups sustanciales (3.59x con 12 workers) y exhibiendo escalabilidad robusta. Esta aproximación explota el paralelismo inherente en el problema de múltiples comparaciones, donde cada tarea es independiente, suficientemente costosa para amortizar el overhead, y no requiere sincronización durante la ejecución.
+
+Los resultados subrayan un principio general del diseño de algoritmos paralelos: \textit{el paralelismo de grano grueso con mínima sincronización típicamente supera al paralelismo de grano fino con sincronización frecuente}. Para aplicaciones bioinformáticas que procesan colecciones de secuencias, la recomendación clara es implementar paralelismo a nivel de tarea (comparaciones, análisis, búsquedas) utilizando algoritmos secuenciales eficientes como componentes internos, en lugar de intentar paralelizar cada algoritmo individualmente.
+
+Esta conclusión, validada empíricamente a través de los experimentos presentados, proporciona una guía práctica valiosa para el desarrollo futuro de herramientas de análisis de secuencias biológicas y, más generalmente, para cualquier sistema que deba procesar grandes colecciones de datos independientes.

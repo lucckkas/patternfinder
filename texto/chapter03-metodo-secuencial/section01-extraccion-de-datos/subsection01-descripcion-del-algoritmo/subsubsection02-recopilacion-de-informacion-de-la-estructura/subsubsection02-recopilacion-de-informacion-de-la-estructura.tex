@@ -3,29 +3,22 @@
 
 Se recorre la secuencia para identificar los ligandos y aminoácidos de la proteína, almacenando la información relevante en listas para su posterior procesamiento.
 
-\begin{algorithm}[H]
-\caption{Proceso de extracción de ligandos y átomos de proteína}
-\begin{algorithmic}[1]
-\ForAll{cadena en la estructura}
-    \ForAll{residuo en la cadena}
-        \State Obtener \texttt{hetfield}, \texttt{resseq} y \texttt{icode} para identificar el residuo
-        // hetfield: Indica el tipo de residuo. 
+\begin{verbatim}
+Para cada cadena en la estructura:
+Para cada residuo en la cadena:
+Obtener hetfield, resseq e icode para identificar el residuo
+// hetfield: Indica el tipo de residuo
+// resseq: Número de secuencia del residuo
+// icode: Código de inserción
         
-        // resseq: Es el número de secuencia del residuo
+        Obtener el nombre del residuo (resname)
         
-        // icode: Código de inserción.
-        
-        \State Obtener el nombre del residuo (\texttt{resname})
-        \If{el residuo es un ligando}
-            \State Añadir el residuo a \texttt{ligand\_residues}
-        \ElsIf{el residuo es de proteína}
-            \State Añadir los átomos del residuo a \texttt{protein\_atoms}
-            \State Añadir el residuo a \texttt{residues\_list}
-        \EndIf
-    \EndFor
-\EndFor
-\end{algorithmic}
-\end{algorithm}
+        Si el residuo es un ligando:
+        Añadir el residuo a ligand_residues
+        Sino, si el residuo es de proteína:
+        Añadir los átomos del residuo a protein_atoms
+        Añadir el residuo a residues_list
+        \end{verbatim}
 
 
 \paragraph{Ejemplo:}

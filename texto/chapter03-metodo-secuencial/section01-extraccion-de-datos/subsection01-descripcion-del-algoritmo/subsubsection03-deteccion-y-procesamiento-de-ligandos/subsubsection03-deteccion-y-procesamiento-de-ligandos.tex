@@ -3,19 +3,16 @@
 
 Se verifica si existen ligandos en la estructura y se procesa cada uno de ellos individualmente.
 
-\begin{algorithm}[H]
-\caption{Identificación de aminoácidos interactuantes con ligandos}
-\begin{algorithmic}[1]
-\If{no se encontraron residuos de ligando}
-    \State Terminar el algoritmo
-\EndIf
-\State Obtener códigos únicos de ligandos (\texttt{ligand\_codes})
-\ForAll{código de ligando \texttt{lig\_code} en \texttt{ligand\_codes}}
-    \State Obtener los átomos del ligando actual
-    \State Proceder con la identificación de aminoácidos interactuantes
-\EndFor
-\end{algorithmic}
-\end{algorithm}
+\begin{verbatim}
+Si no se encontraron residuos de ligando:
+    Terminar el algoritmo
+
+Obtener códigos únicos de ligandos (ligand_codes)
+
+Para cada código de ligando (lig_code) en ligand_codes:
+    Obtener los átomos del ligando actual
+    Proceder con la identificación de aminoácidos interactuantes
+\end{verbatim}
 
 
 \paragraph{Ejemplo:}

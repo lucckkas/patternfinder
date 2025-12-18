@@ -1,0 +1,53 @@
+================================================
+Benchmark BatchCompare: Secuencial vs Paralelo
+================================================
+
+Archivo: sec.txt
+Secuencias: 100
+Comparaciones: 4950
+
+=== MODO SECUENCIAL ===
+Ejecutando... ✓ Completado en 100609ms
+  - CSV: seq_stats.csv
+
+=== MODO PARALELO (2 workers) ===
+Ejecutando... ✓ Completado en 60655ms
+  - CSV: par2_stats.csv
+
+=== MODO PARALELO (4 workers) ===
+Ejecutando... ✓ Completado en 49585ms
+  - CSV: par4_stats.csv
+
+=== MODO PARALELO (8 workers) ===
+Ejecutando... ✓ Completado en 44940ms
+  - CSV: par8_stats.csv
+
+=== MODO PARALELO (12 workers) ===
+Ejecutando... ✓ Completado en 33577ms
+  - CSV: par12_stats.csv
+
+=== RESUMEN DE RESULTADOS ===
+
+Patrones únicos encontrados:
+  - Secuencial:     0 patrones
+  - Paralelo (2w):  0 patrones
+  - Paralelo (4w):  0 patrones
+  - Paralelo (8w):  0 patrones
+  - Paralelo (12w): 0 patrones
+
+Tiempos de ejecución:
+  Modo                   Tiempo
+  ----                   ------
+  Secuencial            100609ms
+  Paralelo (2 workers)   60655ms
+  Paralelo (4 workers)   49585ms
+  Paralelo (8 workers)   44940ms
+  Paralelo (12 workers)   33577ms
+
+Speedup (vs. secuencial):
+  2 workers              1.66x
+  4 workers              2.03x
+  8 workers              2.24x
+  12 workers             3.00x
+
+Archivos CSV generados:

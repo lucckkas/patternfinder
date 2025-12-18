@@ -3,19 +3,16 @@
 
 Se extrae el segmento de la secuencia que abarca desde el primer hasta el último aminoácido que interactúa con el ligando.
 
-\begin{algorithm}[H]
-\caption{Detección de segmento interactuante en la secuencia resaltada}
-\begin{algorithmic}[1]
-\State Utilizar una expresión regular para encontrar el segmento que inicia y termina con una letra mayúscula
-\If{se encuentra una coincidencia}
-    \State Extraer el segmento interactuante (\texttt{interacting\_segment})
-    \State Mostrar el segmento interactuante al usuario
-\Else
-    \State Indicar que no se encontraron residuos que interactúen con el ligando
-\EndIf
-\end{algorithmic}
-\end{algorithm}
- ligando y se muestra al usuario.
+\begin{verbatim}
+Utilizar una expresión regular para encontrar el segmento que inicia
+y termina con una letra mayúscula
+
+Si se encuentra una coincidencia:
+    Extraer el segmento interactuante (interacting_segment)
+    Mostrar el segmento interactuante al usuario
+Sino:
+    Indicar que no se encontraron residuos que interactúen con el ligando
+\end{verbatim}
 
 
 \paragraph{Ejemplo: Extracción y Presentación del Segmento Interactuante}
@@ -33,5 +30,11 @@ Se extrae el segmento que va desde la primera letra mayúscula hasta la última:
 \end{center}
 
 Este es el segmento de aminoácidos que interactúa con el ligando \texttt{NH2}.
-El mismo proceso se repite para los otros ligandos identificados.
-
+El mismo proceso se repite para los otros ligandos identificados. En caso de que los aminoácidos no sean consecutivos, la subsecuencia de interés incluira los aminoácidos intermedios que no interactúan con el ligando en minúsculas. Por ejemplo, si la secuencia fuera:
+\begin{center}
+    \texttt{ykcglcersHfveksalKsrhqrvN}
+\end{center}
+El segmento interactuante extraído sería:
+\begin{center}
+    \texttt{HfveksalKsrhqrvN}
+\end{center}

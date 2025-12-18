@@ -1,29 +1,56 @@
-\section{Resultados Esperados}
+\section{Resultados Obtenidos}
 
-\paragraph{Objetivos específicos}
+El desarrollo del proyecto permitió alcanzar los objetivos específicos planteados, aunque con resultados diferentes a los inicialmente esperados en algunos aspectos. A continuación se presenta un resumen de los resultados obtenidos para cada objetivo:
 
-\subparagraph{Objetivo Específico 1: Identificar las partes del algoritmo que pueden ser paralelizadas.}
+\paragraph{Objetivo Específico 1: Identificar las partes del algoritmo que pueden ser paralelizadas}
+
+\textit{Método:} Se analizó el algoritmo secuencial existente para identificar cuellos de botella y oportunidades de paralelismo.
+
+\textit{Resultados:} Se identificaron exitosamente dos componentes principales susceptibles de paralelización:
+
 \begin{itemize}
-    \item \textbf{Resultado Esperado:} Se espera identificar de manera clara las secciones del algoritmo secuencial que presentan alta carga computacional y que pueden beneficiarse de la paralelización.
-    \item \textbf{Pruebas para Lograr Resultado Esperado:} Identificación de cuellos de botella a través de pruebas de rendimiento.
+    \item \textbf{Construcción de la matriz DP:} Se identificó que las celdas de cada diagonal son independientes entre sí y pueden calcularse concurrentemente, con dependencias solo entre diagonales consecutivas.
+    \item \textbf{Backtracking:} Se determinó que las bifurcaciones en el árbol de búsqueda representan caminos independientes que pueden explorarse en paralelo.
+    \item \textbf{Procesamiento de múltiples pares:} Se identificó que la comparación de múltiples pares de secuencias constituye un nivel adicional de paralelismo de grano grueso altamente efectivo.
 \end{itemize}
 
-\subparagraph{Objetivo Específico 2: Diseñar un algoritmo que haga uso de hilos para descubrir patrones usando computación paralela.}
+\paragraph{Objetivo Específico 2: Diseñar un algoritmo que haga uso de hilos para descubrir patrones usando computación paralela}
+
+\textit{Método:} Se diseñaron arquitecturas de paralelización basadas en una revisión de literatura sobre algoritmos paralelos de programación dinámica, y las capacidades nativas de concurrencia de Go (goroutines, channels, mutexes).
+
+\textit{Resultados:} Se diseñaron e implementaron dos estrategias de paralelización complementarias:
+
 \begin{itemize}
-    \item \textbf{Resultado Esperado:} Se espera tener un diseño detallado y optimizado del algoritmo que divida el trabajo en tareas paralelas de forma efectiva, manteniendo la precisión del análisis.
-    \item \textbf{Pruebas para Lograr Resultado Esperado:} Validación del diseño mediante revisiones por pares y simulaciones de ejecución en entornos controlados para evaluar la distribución de carga y sincronización de los hilos.
+    \item \textbf{Paralelización interna del LCS:} Diseño por diagonales para la matriz DP y bifurcación dinámica para el backtracking, utilizando goroutines, WaitGroups y mutexes para sincronización.
+    \item \textbf{Paralelización a nivel de tarea:} Diseño de un sistema productor-consumidor con pool de workers para procesar múltiples comparaciones pareadas concurrentemente.
 \end{itemize}
 
-\subparagraph{Objetivo Específico 3: Implementar el algoritmo basado en hilos.}
+\paragraph{Objetivo Específico 3: Implementar el algoritmo basado en hilos}
+
+\textit{Método:} Se implementaron los diseños en Go, utilizando el paquete \texttt{sync} para primitivas de concurrencia. Se desarrollaron pruebas unitarias exhaustivas y se verificó la corrección funcional mediante comparación con la versión secuencial.
+
+\textit{Resultados:} Se implementaron exitosamente ambas versiones del algoritmo:
+
 \begin{itemize}
-    \item \textbf{Resultado Esperado:} Se espera que el algoritmo sea implementado con éxito y que ejecute de forma paralela el cálculo de las matrices LCS y la reconstrucción de patrones sin errores de concurrencia.
-    \item \textbf{Pruebas para Lograr Resultado Esperado:} Ejecuciones de prueba del código en entornos de desarrollo, uso de pruebas unitarias para validar la funcionalidad de cada parte del código, y monitoreo del uso de CPU y memoria durante la ejecución.
+    \item La implementación paralela del LCS es funcionalmente correcta, generando exactamente los mismos resultados que la versión secuencial sin errores de concurrencia.
+    \item La herramienta \texttt{batchcompare} fue implementada con capacidad de procesamiento paralelo configurable (2, 4, 8, 12+ workers).
+    \item Todas las pruebas unitarias confirman la corrección funcional de ambas implementaciones.
 \end{itemize}
 
-\subparagraph{Objetivo Específico 4: Evaluar el rendimiento del algoritmo en paralelo frente a la versión en serie.}
+\paragraph{Objetivo Específico 4: Evaluar el rendimiento del algoritmo en paralelo frente a la versión en serie}
+
+\textit{Método:} Se ejecutaron benchmarks exhaustivos con secuencias aleatorias de longitud 20 a 260 caracteres, midiendo tiempos de ejecución, speedup, y eficiencia. Para \texttt{batchcompare}, se evaluaron 4,950 comparaciones con 2, 4, 8 y 12 workers.
+
+\textit{Resultados:} Los resultados de rendimiento revelaron un comportamiento diferenciado según el nivel de paralelización:
+
 \begin{itemize}
-    \item \textbf{Resultado Esperado:} Se espera que el algoritmo en paralelo reduzca significativamente el tiempo de procesamiento en al menos un 50\% respecto a la versión en serie, sin comprometer la precisión de los resultados.
-    \item \textbf{Pruebas para Lograr Resultado Esperado:} Comparación de tiempos de ejecución entre la versión paralela y la versión secuencial del algoritmo en diferentes conjuntos de datos de prueba, y análisis de la eficiencia de los hilos en función del número de hilos usados.
+    \item \textbf{Paralelización interna del LCS:} Contrariamente a lo esperado, la versión paralela resultó más lenta (speedup promedio de 0.37x), con el overhead de sincronización superando el beneficio computacional. Sin embargo, se observó una tendencia de mejora con secuencias más largas (hasta 0.68x para longitud 180, 0.74x en backtracking para longitud 240-260).
+    
+    \item \textbf{Paralelización por pares:} Superó ampliamente las expectativas, logrando un speedup de 3.59x con 12 workers para 4,950 comparaciones, reduciendo el tiempo de procesamiento en un 72\%. Este enfoque demostró escalabilidad sostenida y alta eficiencia.
+    
+    \item \textbf{Lección principal:} El paralelismo de grano grueso (comparaciones independientes) resultó significativamente más efectivo que el paralelismo de grano fino (operaciones internas del LCS), demostrando que no todas las oportunidades de paralelización son igualmente beneficiosas.
 \end{itemize}
+
+Estos resultados, aunque divergentes de las expectativas iniciales en la paralelización interna, proporcionan conocimiento valioso sobre cuándo y cómo aplicar paralelización efectivamente en algoritmos de análisis de secuencias biológicas.
 
 
