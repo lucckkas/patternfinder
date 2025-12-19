@@ -23,15 +23,16 @@ Sistema completo para la detección, análisis y comparación de patrones en sec
 ### Para las herramientas Go:
 
 -   Go 1.18 o superior
--   Sistema operativo: Linux, macOS o Windows
+-   Sistema operativo: Linux o macOS
 
 ### Para las herramientas Python:
 
 -   Python 3.7 o superior
--   Bibliotecas: `matplotlib`, `numpy`
+-   Bibliotecas: `matplotlib`, `numpy`, `biopython`
 
 ```bash
 pip install matplotlib numpy
+pip install biopython
 ```
 
 ---

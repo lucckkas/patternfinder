@@ -54,3 +54,5 @@ venv/
 # Tools
 pip-wheel-metadata/
 scratch/
+
+texto/
